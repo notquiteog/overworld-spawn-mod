@@ -181,10 +181,15 @@ end
 local function attachPmdIdleToNpc(npc, resolved)
   if not npc then return end
   if not (resolved and resolved.providerId == "pmdcollab" and npc.sprite) then
-    npc._pmdIdleMeta = nil
-    npc._pmdIdle = nil
-    npc._pmdWalkMeta = nil
-    npc._pmdWalk = nil
+    local ok, PmdIdle = pcall(function() return V.require("pmd_idle") end)
+    if ok and PmdIdle and PmdIdle.clearEntityState then
+      PmdIdle.clearEntityState(npc)
+    else
+      npc._pmdIdleMeta = nil
+      npc._pmdIdle = nil
+      npc._pmdWalkMeta = nil
+      npc._pmdWalk = nil
+    end
     return
   end
   npc.spriteProviderId = "pmdcollab"
@@ -219,10 +224,16 @@ local function attachPresentation(npc, resolved)
   if resolved and resolved.providerId == "pmdcollab" then
     attachPmdIdleToNpc(npc, resolved)
   else
-    npc._pmdIdleMeta = nil
-    npc._pmdIdle = nil
-    npc._pmdWalkMeta = nil
-    npc._pmdWalk = nil
+    -- Leaving PMDCollab: detach wrap + clear all PMD animation state.
+    local ok, PmdIdle = pcall(function() return V.require("pmd_idle") end)
+    if ok and PmdIdle and PmdIdle.clearEntityState then
+      PmdIdle.clearEntityState(npc)
+    else
+      npc._pmdIdleMeta = nil
+      npc._pmdIdle = nil
+      npc._pmdWalkMeta = nil
+      npc._pmdWalk = nil
+    end
   end
 end
 

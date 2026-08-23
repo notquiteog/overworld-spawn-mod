@@ -369,6 +369,7 @@ end
 
 local PmdWalk = V.require("pmd_walk")
 local walkEnt = {
+  spriteProviderId = "pmdcollab",
   facing = "down",
   moving = true,
   _pmdWalkMeta = {
@@ -385,6 +386,22 @@ walkEnt.facing = "right"
 eq(PmdWalk.frameOverride(walkEnt), 34 + 3 * 4, "real right stand base")
 walkEnt._pmdIdle = { playing = true }
 eq(PmdWalk.frameOverride(walkEnt), nil, "idle playing wins over walk")
+
+-- Non-PMD provider must never get a PMD override even with stale meta
+local folStale = {
+  spriteProviderId = "followers_ex",
+  facing = "down",
+  moving = true,
+  _pmdWalkMeta = {
+    walkFrameCount = 4,
+    walkDurations = { 8, 10, 8, 10 },
+    walkCycleBase = 34,
+  },
+  _pmdWalk = { frame = 1, frameElapsed = 0, facing = "down" },
+}
+eq(PmdWalk.frameOverride(folStale), nil, "followers ignore stale PmdWalk meta")
+eq(PmdWalk.animationOwner(folStale), "native", "followers animationOwner native")
+eq(PmdWalk.animationOwner(walkEnt), "pmdcollab", "pmd animationOwner")
 
 local Pres = V.require("sprite_presentation")
 eq(Pres.effectiveStepFlip({ disableVerticalStepFlip = true }, true), false,
@@ -445,11 +462,13 @@ do
   end
 end
 
--- followers_ex also disables vertical stepFlip (Squirtle jump fix)
+-- followers_ex uses native Gen1Recomp walker (no disableVerticalStepFlip).
 local fol = providers:resolve("followers", "SQUIRTLE", "normal", nil)
 if fol and fol.def then
-  eq(fol.def.disableVerticalStepFlip, true, "poke-followers disableVerticalStepFlip")
+  check(fol.def.disableVerticalStepFlip ~= true,
+    "poke-followers keep native stepFlip (no disableVerticalStepFlip)")
   check(fol.def.forceRawTrueColor ~= true, "followers do not force raw truecolor")
+  check(fol.def.walkFrameCount == nil, "followers have no walkFrameCount")
 else
   check(false, "resolve squirtle followers")
 end

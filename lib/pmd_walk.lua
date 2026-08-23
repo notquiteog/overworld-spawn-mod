@@ -1,10 +1,14 @@
 -- Presentation-only Walk cycle for PMDCollab overworld sprites.
 -- Uses imported full Walk frames + durations via frameOverride.
 -- Does NOT drive AI, pathfinding, occupancy, or movement timing.
+--
+-- HARD GATE: every entry point requires spriteProviderId == "pmdcollab".
+-- Non-PMD providers must never receive frameOverride or duration timers.
 local V = ...
 
 local PmdWalk = {}
 
+PmdWalk.PROVIDER_ID = "pmdcollab"
 -- Upstream AnimData durations are engine ticks at 60 Hz.
 PmdWalk.TICK_HZ = 60
 
@@ -18,12 +22,23 @@ local function facingKey(facing)
   return "down"
 end
 
+--- True only when the entity's active sprite provider is PMDCollab.
+function PmdWalk.isActiveProvider(entity)
+  return entity ~= nil and entity.spriteProviderId == PmdWalk.PROVIDER_ID
+end
+
 local function walkMeta(entity)
-  local meta = entity and entity._pmdWalkMeta
-  if type(meta) == "table" then return meta end
-  local def = entity and entity.sprite and entity.sprite.def
-  if type(def) == "table" and tonumber(def.walkFrameCount) then
-    return def
+  if not PmdWalk.isActiveProvider(entity) then
+    return nil
+  end
+  local meta = entity._pmdWalkMeta
+  if type(meta) ~= "table" then
+    return nil
+  end
+  -- Require explicit PMD walk-cycle fields. Never fall back to a generic
+  -- sprite.def.walkFrameCount (that field must not leak into other providers).
+  if tonumber(meta.walkFrameCount) and tonumber(meta.walkCycleBase) then
+    return meta
   end
   return nil
 end
@@ -55,9 +70,12 @@ function PmdWalk.walkFrameBase(walkCycleBase, walkFrameCount, facing)
 end
 
 --- Absolute sheet frame while standing/moving, or nil if unavailable.
---- Yields nil while Idle is playing so PmdIdle owns the override.
+--- Yields nil for any non-PMDCollab provider (hard island boundary).
 function PmdWalk.frameOverride(entity)
   if not entity then return nil end
+  if not PmdWalk.isActiveProvider(entity) then
+    return nil
+  end
   if entity._pmdIdle and entity._pmdIdle.playing then
     return nil
   end
@@ -85,8 +103,25 @@ function PmdWalk.frameOverride(entity)
   return frameBase + 0
 end
 
+--- Presentation ownership for tests / diagnostics.
+function PmdWalk.animationOwner(entity)
+  if PmdWalk.isActiveProvider(entity) and walkMeta(entity) then
+    return "pmdcollab"
+  end
+  return "native"
+end
+
+function PmdWalk.clearEntityState(entity)
+  if not entity then return end
+  entity._pmdWalkMeta = nil
+  entity._pmdWalk = nil
+end
+
 function PmdWalk.update(entity, dt)
   if not entity then return end
+  if not PmdWalk.isActiveProvider(entity) then
+    return
+  end
   dt = tonumber(dt) or 0
   if dt < 0 then dt = 0 end
 

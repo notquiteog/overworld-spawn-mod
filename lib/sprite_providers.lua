@@ -140,9 +140,8 @@ local function copyDef(def, spriteId, mod)
   if def.forceRawTrueColor then out.forceRawTrueColor = true end
   if def.idleFrameCount ~= nil then out.idleFrameCount = def.idleFrameCount end
   if def.idleDurations ~= nil then out.idleDurations = def.idleDurations end
-  if def.walkFrameCount ~= nil then out.walkFrameCount = def.walkFrameCount end
-  if def.walkDurations ~= nil then out.walkDurations = def.walkDurations end
-  if def.walkCycleBase ~= nil then out.walkCycleBase = def.walkCycleBase end
+  -- walkFrameCount / walkDurations / walkCycleBase are PMDCollab-only and
+  -- must NOT travel through the generic external-provider copyDef path.
   return out
 end
 
@@ -1039,9 +1038,8 @@ function SpriteProviders:_makeFollowersExProvider()
         -- zone pass colors them; colored art (ADVANCED / headless fallback)
         -- is true so it draws raw.
         trueColor = not lumaServed,
-        -- Asymmetric Pokémon art (e.g. Squirtle) must not use Gen1Recomp's
-        -- up/down alternate-step full-sprite mirror.
-        disableVerticalStepFlip = true,
+        -- Native Gen1Recomp walker (stand/walk + stepFlip). Do NOT set
+        -- disableVerticalStepFlip here — that is a PMDCollab-only opt-out.
         id = "SPRITE_OW_WILD_" .. tostring(dex),
       }
       local meta = {

@@ -442,10 +442,15 @@ function AmbientPokemon:_bindSprite(npc, species, game)
       end
     else
       npc.spriteProviderId = def.providerId
-      npc._pmdIdleMeta = nil
-      npc._pmdIdle = nil
-      npc._pmdWalkMeta = nil
-      npc._pmdWalk = nil
+      local okClear, PmdIdleClear = pcall(function() return V.require("pmd_idle") end)
+      if okClear and PmdIdleClear and PmdIdleClear.clearEntityState then
+        PmdIdleClear.clearEntityState(npc)
+      else
+        npc._pmdIdleMeta = nil
+        npc._pmdIdle = nil
+        npc._pmdWalkMeta = nil
+        npc._pmdWalk = nil
+      end
       local okP, SpritePresentation = pcall(function() return V.require("sprite_presentation") end)
       if okP and SpritePresentation and SpritePresentation.attach then
         pcall(SpritePresentation.attach, sprite, npc)

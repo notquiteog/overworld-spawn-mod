@@ -103,7 +103,10 @@ function PmdIdle.isEligible(entity)
 end
 
 function PmdIdle.frameOverride(entity)
-  local state = entity and entity._pmdIdle
+  if not (entity and entity.spriteProviderId == "pmdcollab") then
+    return nil
+  end
+  local state = entity._pmdIdle
   if not (state and state.playing) then return nil end
   local base = state.base
   local frame = tonumber(state.frame) or 0
@@ -125,6 +128,10 @@ function PmdIdle.attachDrawWrap(sprite, entity)
   sprite._pmdIdleWrapped = true
   function sprite:draw(px, py, camX, camY, facing, walkPhase, stepFlip, topHalf, forceFlip, frameOverride)
     local ent = self._pmdIdleEntity or entity
+    -- Hard island: never inject PMD frameOverride for non-PMDCollab entities.
+    if not (ent and ent.spriteProviderId == "pmdcollab") then
+      return orig(self, px, py, camX, camY, facing, walkPhase, stepFlip, topHalf, forceFlip, frameOverride)
+    end
     local override = PmdIdle.frameOverride(ent)
     if override == nil then
       local okW, PmdWalk = pcall(function() return V.require("pmd_walk") end)
@@ -141,6 +148,36 @@ function PmdIdle.attachDrawWrap(sprite, entity)
   return true
 end
 
+--- Remove PMD idle/walk draw wrap so native SpriteRenderer owns pose again.
+function PmdIdle.detachDrawWrap(sprite)
+  if type(sprite) ~= "table" then return false end
+  if not sprite._pmdIdleWrapped then return false end
+  if type(sprite._pmdIdleOrigDraw) == "function" then
+    sprite.draw = sprite._pmdIdleOrigDraw
+  end
+  sprite._pmdIdleOrigDraw = nil
+  sprite._pmdIdleEntity = nil
+  sprite._pmdIdleWrapped = nil
+  return true
+end
+
+--- Clear all PMD presentation state when leaving the pmdcollab provider.
+function PmdIdle.clearEntityState(entity)
+  if not entity then return end
+  entity._pmdIdleMeta = nil
+  entity._pmdIdle = nil
+  local okW, PmdWalk = pcall(function() return V.require("pmd_walk") end)
+  if okW and PmdWalk and PmdWalk.clearEntityState then
+    PmdWalk.clearEntityState(entity)
+  else
+    entity._pmdWalkMeta = nil
+    entity._pmdWalk = nil
+  end
+  if entity.sprite then
+    PmdIdle.detachDrawWrap(entity.sprite)
+  end
+end
+
 local function idleDurations(entity)
   local meta = entity and entity._pmdIdleMeta
   if type(meta) == "table" and type(meta.idleDurations) == "table" then
@@ -155,6 +192,9 @@ end
 
 function PmdIdle.update(entity, dt, rng)
   if not entity then return end
+  if entity.spriteProviderId ~= "pmdcollab" then
+    return
+  end
   dt = tonumber(dt) or 0
   if dt < 0 then dt = 0 end
 

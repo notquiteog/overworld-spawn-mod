@@ -234,8 +234,9 @@ r = providers:resolve("followers", 25, "normal", {
 eq(r.providerId, "followers_ex", "followers uses built-in poke_followers")
 check(r.def and tostring(r.def.image):find("follower_025", 1, true),
       "followers maps Pikachu to follower_025")
-eq(r.def.disableVerticalStepFlip, true,
-   "followers_ex disables vertical stepFlip (asymmetric mons)")
+check(r.def.disableVerticalStepFlip ~= true,
+   "followers_ex keeps native vertical stepFlip")
+check(r.def.walkFrameCount == nil, "followers_ex has no PMD walkFrameCount")
 
 -- Legacy followers_ex setting value also works
 r = providers:resolve("followers_ex", 25, "normal", {

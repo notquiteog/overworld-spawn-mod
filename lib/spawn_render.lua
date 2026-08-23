@@ -2293,6 +2293,7 @@ function SpawnRender:applyProviderSprite(entity, game, options)
         pcall(SpritePresentation.attach, entity.sprite, entity)
       end
       if result.providerId == "pmdcollab" then
+        entity.spriteProviderId = "pmdcollab"
         entity._pmdWalkMeta = {
           walkFrameCount = result.def.walkFrameCount or (result.meta and result.meta.walkFrameCount),
           walkDurations = result.def.walkDurations or (result.meta and result.meta.walkDurations),
@@ -2305,6 +2306,11 @@ function SpawnRender:applyProviderSprite(entity, game, options)
         local okIdle, PmdIdle = pcall(function() return V.require("pmd_idle") end)
         if okIdle and PmdIdle then
           PmdIdle.attachDrawWrap(entity.sprite, entity)
+        end
+      else
+        local okIdle, PmdIdle = pcall(function() return V.require("pmd_idle") end)
+        if okIdle and PmdIdle and PmdIdle.clearEntityState then
+          PmdIdle.clearEntityState(entity)
         end
       end
     end
@@ -2483,10 +2489,15 @@ function SpawnRender:applyProviderSprite(entity, game, options)
       PmdIdle.schedule(entity)
     end
   else
-    entity._pmdIdleMeta = nil
-    entity._pmdIdle = nil
-    entity._pmdWalkMeta = nil
-    entity._pmdWalk = nil
+    local okIdle, PmdIdle = pcall(function() return V.require("pmd_idle") end)
+    if okIdle and PmdIdle and PmdIdle.clearEntityState then
+      PmdIdle.clearEntityState(entity)
+    else
+      entity._pmdIdleMeta = nil
+      entity._pmdIdle = nil
+      entity._pmdWalkMeta = nil
+      entity._pmdWalk = nil
+    end
   end
   -- Native walker sheets are driven solely by SpriteRenderer + Movement.walkPhase.
   -- Never mark them as the deprecated enhanced-atlas body path.
