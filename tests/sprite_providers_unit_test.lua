@@ -234,6 +234,9 @@ r = providers:resolve("followers", 25, "normal", {
 eq(r.providerId, "followers_ex", "followers uses built-in poke_followers")
 check(r.def and tostring(r.def.image):find("follower_025", 1, true),
       "followers maps Pikachu to follower_025")
+check(r.def.disableVerticalStepFlip ~= true,
+   "followers_ex keeps native vertical stepFlip")
+check(r.def.walkFrameCount == nil, "followers_ex has no PMD walkFrameCount")
 
 -- Legacy followers_ex setting value also works
 r = providers:resolve("followers_ex", 25, "normal", {
@@ -509,7 +512,7 @@ eq(wraps, 0, "start menu hook not registered by sprite style menu")
 check(screens >= 4, "style/spawn/random/water screens registered")
 eq(menu._registered, true, "menu marked registered")
 
--- options.lua exposes exactly the three public styles
+-- options.lua exposes the four public styles
 local schema = assert(loadfile("options.lua"))()
 local styleOpt
 for _, row in ipairs(schema) do
@@ -517,7 +520,7 @@ for _, row in ipairs(schema) do
 end
 check(styleOpt ~= nil, "options has sprite_style")
 eq(styleOpt.default, "followers", "options default is followers")
-eq(#styleOpt.choices, 3, "exactly three public sprite styles")
+eq(#styleOpt.choices, 4, "exactly four public sprite styles")
 local saw = {}
 for _, choice in ipairs(styleOpt.choices) do
   -- Mod Settings shows the full GSC label; Gen1 ListMenu uses ≤14 abbrev.
@@ -531,6 +534,7 @@ end
 check(saw.pokemmo == "HGSS / PokeMMO", "options includes HGSS / PokeMMO")
 check(saw.followers == "Poke Followers / GSC", "options includes Poke Followers / GSC")
 check(saw.pokedex == "Pokédex" or saw.pokedex == "Pokedex", "options includes Pokedex")
+check(saw.pmdcollab == "PMDCollab", "options includes PMDCollab")
 check(saw.auto == nil and saw.gold == nil and saw.followers_ex == nil,
       "legacy styles removed from public options")
 
