@@ -9,6 +9,11 @@ by party Pokémon — without replacing the classic Gen 1 feel.
 It also includes **experimental Pokémon Gold / Gen 2 support (beta)**.
 The mod targets **Gen 1 + Gen 2** in Gen1Recomp's Mod Manager.
 
+**2.2.0** adds optional **PMDCollab** overworld sprites and independent
+dialogue portraits, derived from
+[PMDCollab/SpriteCollab](https://github.com/PMDCollab/SpriteCollab).
+Huge shoutout to that project and its contributors — see below.
+
 ## Features
 
 - Visible overworld Pokémon with idle, roam, chase, and hidden behaviours
@@ -42,14 +47,37 @@ Gen 2 compatibility layer.
 > Please report anything that behaves differently from Gen1.
 
 Currently working: overworld wilds from Gold encounter data, roam / chase,
-random-encounter suppression, Wilds settings, HGSS and Poké Followers / GSC
-sprites (including True Size where supported), swimming / water presentation,
+random-encounter suppression, Wilds settings, HGSS, Poké Followers / GSC, and
+PMDCollab sprites (including True Size where supported), swimming / water
+presentation,
 town Pokémon on curated Johto towns, party followers, and overworld catching
 (same throw UX as Gen1). Safari and special engine catch sessions stay off.
 
 If reporting a Gen2 issue, include Pokémon Gold, map / location, sprite style,
 follower count / control mode if relevant, Voxel mod if enabled, and
 reproduction steps.
+
+## PMDCollab Sprites
+
+Wilds now ships a new optional **Sprite Style: PMDCollab** plus independent
+dialogue portraits. The art is derived from
+[PMDCollab/SpriteCollab](https://github.com/PMDCollab/SpriteCollab)
+(CC BY-NC 4.0).
+
+Shoutout to the [SpriteCollab](https://github.com/PMDCollab/SpriteCollab)
+project and everyone listed in `assets/pmdcollab/CREDITS.txt` — Wilds would
+not have these Mystery Dungeon–style walkers and talk portraits without that
+repo.
+
+- Enable the overworld look via **Sprite Style → PMDCollab**
+- Portraits appear for Wilds Pokémon talk (followers, town Pokémon, generic
+  cries) under every Sprite Style, not only PMDCollab
+- Water Pokémon still use Wilds swimming / levitate / silhouette presentation
+  (SpriteCollab has no generic Swim set for Gen 1–2)
+
+Full license and attribution:
+[THIRD_PARTY_ASSETS.md](THIRD_PARTY_ASSETS.md) and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Settings
 
@@ -161,6 +189,9 @@ Active collaborators on this project:
   selection / integration / Poke Followers / GSC - Sprites
 - **ShockSlayer / Crystal Clear team** — for the GSC-style Pokémon sprite work that the Poké Followers / GSC presentation is based on
 - [gamecorner-033](https://github.com/gamecorner-033) — Original PokéPC / Overworld Catching inspiration / overworld follower concepts and related work
+- [PMDCollab / SpriteCollab](https://github.com/PMDCollab/SpriteCollab) —
+  Mystery Dungeon–style overworld sprites and dialogue portraits (optional
+  Sprite Style + talk portraits). Shoutout to that repo and its contributors.
 
 ## Credits
 

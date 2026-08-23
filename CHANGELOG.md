@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.2.0
+
 ### PMDCollab / SpriteCollab support
 
 - New optional **Sprite Style: PMDCollab** (`pmdcollab`) with derived Gen1–Gen2
