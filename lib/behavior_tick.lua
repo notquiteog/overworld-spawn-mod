@@ -268,6 +268,7 @@ function BehaviorTick:_fillBehaviorCtx(ctx, ow, game, logic, occupancy, cfg, saf
 end
 
 function BehaviorTick:step(ctx)
+  if self.logic and self.logic.sharedAuthority and self.logic.sharedAuthority.role=="guest" then return end
   if not Config.isEnabled(self.mod) then return end
   if Config.get(self.mod, "wilds_ai") == false then return end
   local logic = self.logic

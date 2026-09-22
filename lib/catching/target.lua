@@ -55,6 +55,7 @@ end
 --- True only for real battleable overworld Wilds entities (visible).
 function Target.isCatchableWild(entity)
   if not entity then return false end
+  if entity.sharedWild then return false end -- Shared encounters must be claimed through the host.
   if entity.wildsCatchLocked == true then return false end
   if entity.wildsCatchPending == true then return false end
   if entity.wildsCatchState == "capturing" or entity.wildsCatchState == "pending" then

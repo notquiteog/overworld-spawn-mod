@@ -59,6 +59,13 @@ local function ensureTables(entity)
 end
 
 function Movement.syncLegacyFields(entity)
+  if entity.sharedPose then
+    local pose=entity.sharedPose
+    entity.cellX,entity.cellY=pose.x,pose.y
+    entity.facing=pose.facing or "down";entity.moving=pose.moving==true
+    entity.phase=pose.phase or 0;entity.hopping=false
+    return
+  end
   ensureTables(entity)
   local p = entity.position
   local m = entity.movement
@@ -114,6 +121,7 @@ end
 
 -- Match Gen1Recomp NPC:walkPhase — stand outside [4,12) of a 16-tick cycle.
 function Movement.walkPhase(entity)
+  if entity and entity.sharedPose then return entity.sharedPose.phase or 0 end
   if not entity then return 0 end
   if not Movement.isBusy(entity) then return 0 end
   local m = entity.movement

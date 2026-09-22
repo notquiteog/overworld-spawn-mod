@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add an independent native FireRed/LeafGreen OPTIONS page for visible wilds,
+  followers and encounter settings. Preserve saved keys; tested on 0.3.0.
+
 ## 2.2.0
 
 ### PMDCollab / SpriteCollab support

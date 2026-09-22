@@ -24,6 +24,8 @@
 -- DramaticShapeVoxelMod is optional; base Gen1Recomp 2D rendering is enough.
 
 return function(mod)
+  local GV=require("src.core.GameVersion")
+  if GV.generation()==3 then return assert((loadstring or load)(assert(mod:read("lib/gen3/init.lua")),"@wilds/gen3/init"))()(mod) end
   local V = { mod = mod, path = mod.path }
 
   local function chunkFor(rel)
@@ -536,6 +538,7 @@ return function(mod)
   mod.exports.supportsFeature = function(feature)
     return supports(feature)
   end
+  mod.exports.sharedSpawns = V.require("shared_spawns")(mod, logic, render, ambient)
   mod.exports.logic = logic
   mod.exports.render = render
   mod.exports.animated = render.animated

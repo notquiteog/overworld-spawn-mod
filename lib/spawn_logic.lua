@@ -1349,6 +1349,11 @@ end
 -- Full map init in the required order. Vanilla suppression is NOT enabled
 -- until this completes with pipelineVerified.
 function SpawnLogic:initializeForMap(mapId, game)
+  if self.sharedAuthority and self.sharedAuthority.role == "guest" then
+    self.state:reset("shared host population")
+    self.state.mapId=mapId;self.state.initialized=true
+    return true
+  end
   local st = self.state
   st:reset("map:" .. tostring(mapId))
   st.updateCallbackRegistered = true
@@ -1770,6 +1775,7 @@ function SpawnLogic:initializeForMap(mapId, game)
 end
 
 function SpawnLogic:trySpawn(game, opts)
+  if self.sharedAuthority and self.sharedAuthority.role == "guest" then return nil end
   opts = opts or {}
   if not self:featureActive() then
     return nil, "feature disabled"
@@ -2130,6 +2136,7 @@ function SpawnLogic:trySpawn(game, opts)
 end
 
 function SpawnLogic:trySpawnWater(game, opts)
+  if self.sharedAuthority and self.sharedAuthority.role == "guest" then return nil end
   opts = opts or {}
   if not self:featureActive() then
     return nil, "feature disabled"
@@ -2551,6 +2558,9 @@ end
 -- Developer test spawn with explicit phase reporting. Never touches Pokédex,
 -- save story flags, or player position.
 function SpawnLogic:testSpawn(species, opts)
+  if self.sharedAuthority and self.sharedAuthority.role=="guest" then
+    return {ok=false,error="Host owns visible spawns"}
+  end
   opts = opts or {}
   local result = {
     ok = false,
@@ -3137,6 +3147,10 @@ function SpawnLogic:_spawnAt(x, y)
 end
 
 function SpawnLogic:_startBattle(record)
+  if self.sharedAuthority then
+    if not record or not record.networkId or self.pendingBattle then return false end
+    return self.sharedAuthority.request(record.mapId,record.networkId)
+  end
   if not record or record.state ~= Config.STATE.AVAILABLE then
     return false
   end
@@ -3406,6 +3420,7 @@ function SpawnLogic:onStepped(ev)
     return
   end
 
+  if self.sharedAuthority and self.sharedAuthority.role == "guest" then return end
   self.stepsOnMap = self.stepsOnMap + 1
 
   if ow then

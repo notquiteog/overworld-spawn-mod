@@ -700,6 +700,7 @@ function AmbientPokemon:clearAll(ow)
 end
 
 function AmbientPokemon:spawnForMap(game, ow)
+  if self.sharedAuthority and self.sharedAuthority.role == 'guest' then return 0 end
   if not Config.townPokemonEnabled(self.mod) then
     self:clearAll(ow)
     return 0

@@ -1507,6 +1507,11 @@ function Entity:setCell(x, y)
 end
 
 function Entity:update(dt)
+  if self.sharedPose then
+    Movement.syncLegacyFields(self)
+    if self.render and self.render.syncEntityAnimation then self.render:syncEntityAnimation(self,dt or 0)end
+    return
+  end
   if Movement.isBusy(self) then
     local done = Movement.update(self, dt or 0)
     if done then
