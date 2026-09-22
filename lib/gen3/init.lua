@@ -9,7 +9,7 @@ return function(mod)
  local Pokemon=require('src.core.game3.pokemon')
  local Field=require('src.core.game3.field')
  local Compat=require('src.mods.Gen3Compat')
- local S={map=nil,spawns={},elapsed=0,nextId=0,follower=nil,shared=nil,cache={}}
+ local S={map=nil,spawns={},elapsed=0,nextId=0,follower=nil,shared=nil,cache={},trail={}}
  local schema=mod.options:define({
   {key='gen3_visible_wilds',label='VISIBLE WILDS',type='toggle',default=true},
   {key='gen3_follower',label='FOLLOWER',type='toggle',default=true},
@@ -18,7 +18,11 @@ return function(mod)
  })
   assert((loadstring or load)(assert(mod:read('lib/InGameOptions.lua')),'@overworld-spawn-mod/options'))().install(mod,schema,'WILDS')
  local function game()return mod.world.game end
- local function busy()local ok,why=Compat.worldBusy();return ok,why end
+ local function busy()
+  local r=mod.find and mod.find('DRAMATIC_SKY_RIDE');local ex=r and r.exports
+  if ex and ex.isFlying and ex.isFlying()then return true,'airborne' end
+  local ok,why=Compat.worldBusy();return ok,why
+ end
  local function sprite(species)
   species=tonumber(species);if not species then return nil end
   local id=Actors.base+species
@@ -180,7 +184,7 @@ return function(mod)
   local g=game();if not g or g.phase~='field' or not Map.current then return end
   if S.map~=Map.current then
    if S.shared and S.shared.role=='host' and S.map then local old,rows=Shared.snapshot();S.cache[old]=rows end
-   S.map=Map.current;S.spawns={};S.follower=nil;Actors.clear()
+   S.map=Map.current;S.spawns={};S.follower=nil;S.trail={};S.lastCell=nil;Actors.clear()
    if S.shared and S.cache[S.map] then Shared.apply(S.map,S.cache[S.map]) else populate() end
   end
   dt=math.min(.1,math.max(0,dt or 0));S.elapsed=S.elapsed+dt
@@ -207,16 +211,51 @@ return function(mod)
     if row.cellX==Player.cellX and row.cellY==Player.cellY then S.encounter(row);break end
    end
   end
-  local mon=mod.options:get('gen3_follower')and g.session and g.session.party and g.session.party[1]
+  -- Record the cells actually vacated by the player. Never invent a cell
+  -- behind their facing (that can be inside a wall or across a ledge).
+  local riding=mod.find and mod.find('DRAMATIC_SKY_RIDE')
+  local ride=riding and riding.exports
+  local mounted=ride and ride.isMounted and ride.isMounted()
+  local at={x=Player.cellX,y=Player.cellY}
+  local last=S.lastCell
+  if last and (last.x~=at.x or last.y~=at.y)then
+   if math.abs(last.x-at.x)+math.abs(last.y-at.y)>2 then S.trail={};Actors.rows[0]=nil;S.follower=nil
+   else S.trail[#S.trail+1]=last end
+  end
+  S.lastCell=at
+  while #S.trail>16 do table.remove(S.trail,1)end
+  local mon=not mounted and mod.options:get('gen3_follower')and g.session and g.session.party and g.session.party[1]
   if mon and (mon.hp or 0)>0 then
    local gid=sprite(mon.species)
    if gid then
-    local d=({up={0,1},down={0,-1},left={1,0},right={-1,0}})[Player.facing]or{0,-1}
-    local x,y=Player.cellX+d[1],Player.cellY+d[2]
-    local f=S.follower or Actors.add(0,Map.current,x,y,gid);S.follower=f;f.graphicsId=gid
-    f.cellX,f.cellY=x,y;f.px=f.px+(x*16-f.px)*math.min(1,dt*7);f.py=f.py+(y*16-f.py)*math.min(1,dt*7);f.facing=Player.facing;f.moving=Player.moving;f.animClock=(f.animClock or 0)+1
+    local function safe(c)
+     return c and Collision.isWalkable(c.x,c.y)and not Collision.isWater(c.x,c.y)
+      and not Collision.warpAt(c.x,c.y)and not require('src.core.game3.objects').blocks(c.x,c.y)
+    end
+    local f=S.follower
+    if not f and safe(S.trail[1])then
+     local c=table.remove(S.trail,1);f=Actors.add(0,Map.current,c.x,c.y,gid);S.follower=f
+    end
+    if f then
+     f.graphicsId=gid;f.moving=false
+     while S.trail[1] and math.abs(S.trail[1].x*16-f.px)+math.abs(S.trail[1].y*16-f.py)<.1 do table.remove(S.trail,1)end
+     local c=S.trail[1]
+     if c and not safe(c)then S.trail={};Actors.rows[0]=nil;S.follower=nil
+     elseif c then
+      local dx,dy=c.x*16-f.px,c.y*16-f.py;local dist=math.abs(dx)+math.abs(dy)
+      local step=math.min(dist,dt*100)
+      if dist>32 then f.px=c.x*16;f.py=c.y*16
+      elseif dist>.1 then
+       f.facing=math.abs(dx)>math.abs(dy)and(dx>0 and 'right'or'left')or(dy>0 and'down'or'up')
+       f.px=f.px+dx/dist*step;f.py=f.py+dy/dist*step;f.moving=true
+      end
+      f.animClock=(f.animClock or 0)+(f.moving and dt*60 or 0)
+      if step>=dist then table.remove(S.trail,1)end
+     end
+     f.cellX=math.floor((f.px+8)/16);f.cellY=math.floor((f.py+8)/16)
+    end
    end
-  elseif S.follower then Actors.rows[0]=nil;S.follower=nil end
+  else Actors.rows[0]=nil;S.follower=nil;S.trail={}end
  end
  mod.hooks:wrap('input.step',function(next,g,dt)next(g,dt);S.update(dt)end)
  mod.hooks:wrap('encounter.roll',function(nextFn,def,ctx)

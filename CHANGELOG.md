@@ -1,3 +1,11 @@
+## 2.3.1 — 2026-09-22
+
+FireRed/LeafGreen followers follow the actual vacated-cell trail, reset on teleports and stay hidden while mounted. Airborne players cannot claim visible encounters. Ride remains optional.
+
+Known limits: Shared overworld throwing remains disabled; granted native battles retain normal catching.
+
+Requires Gen1Recomp 0.3.1 for the verified Gen 3 path. Other mods are optional; no ROM, player save or import cache is included.
+
 ## 2.3.0 — 2026-09-22
 
 Adds native Gen 3 visible wild Pokémon and followers, independent in-game settings, and optional Online room integration. Hosts own shared wild and ambient populations; guests render host snapshots and request exclusive encounters.
