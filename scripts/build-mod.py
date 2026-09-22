@@ -122,8 +122,8 @@ def read_manifest() -> dict:
             fail(f"manifest missing required field: {field}")
     if data.get("id") != "overworld_wild_spawns":
         fail("manifest id must be overworld_wild_spawns")
-    if data.get("github") != "YoDrehDenSwagAuf/overworld-spawn-mod":
-        fail("manifest github must be YoDrehDenSwagAuf/overworld-spawn-mod")
+    if data.get("github") != "notquiteog/overworld-spawn-mod":
+        fail("manifest github must be notquiteog/overworld-spawn-mod")
     entry = data["entry"]
     if not (MOD_DIR / entry).is_file():
         fail(f"entry file missing: {entry}")

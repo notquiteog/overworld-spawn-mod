@@ -3,7 +3,7 @@
 return {
   summary = "Visible and reactive wild Pokemon for the Gen 1 overworld. Roaming, hidden and aggressive encounters across grass, caves and water. Does not change the player spawn.",
   author = "YoDrehDenSwagAuf",
-  contact = "https://github.com/YoDrehDenSwagAuf/overworld-spawn-mod",
+  contact = "https://github.com/notquiteog/overworld-spawn-mod",
   tags = { "overworld", "encounters", "gameplay", "voxel-compatible", "diagnostics" },
   differences = {
     changed = {

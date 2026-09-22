@@ -1,3 +1,7 @@
+**2.3.0: Gen 3 wilds and synchronized room encounters.** Adds native Gen 3 visible wild Pokémon and followers, independent in-game settings, and optional Online room integration. Hosts own shared wild and ambient populations; guests render host snapshots and request exclusive encounters.
+
+Gen 3 follower collision trails and ride suppression need more work. Shared overworld throwing is disabled; granted native encounters retain battle catching.
+
 # Wilds of Kanto
 
 Wilds of Kanto makes Kanto feel alive in
