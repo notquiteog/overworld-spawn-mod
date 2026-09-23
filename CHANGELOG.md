@@ -1,3 +1,9 @@
+## 2.4.1-test.1 — 2026-09-23
+
+Expose per-frame visible-foot anchors for native overworld Pokémon. Grass immersion, silhouettes and faded variants inherit the original frame anchors. Optional renderers can ground each frame without flattening real jump/ride heights. No dependency on Battle Art.
+
+Published before tests at the user’s request; validation follows publication.
+
 ## 2.4.0 — 2026-09-22
 
 Includes cross-generation settings and provider integration, Gen3 HGSS overworld art, shared direct catching and stable sprite foot baselines. A brief Crystal spawn-reveal nil-pose warning remains documented.

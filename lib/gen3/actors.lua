@@ -13,21 +13,22 @@ return function(mod, base)
  end
  local get=Sprites.getDraw
  Sprites.getDraw=function(id) return A.sprites[id] or get(id) end
- function A.sprite(id,image,w,h,frames,groundPadding)
+ function A.sprite(id,image,w,h,frames,groundPadding,groundPaddingByFrame)
   local iw,ih=image:getDimensions();local q={}
   for i=0,(frames or 1)-1 do q[i]=love.graphics.newQuad(0,i*h,w,h,iw,ih)end
   local spr={image=image,quads=q,width=w,height=h,frameCount=frames or 1,inanimate=(frames or 1)==1}
-  -- Public anchor metadata is shared by 2D/optional renderers. Use one baseline
-  -- for every frame so walking hops survive; masks inherit the original value.
+  -- Optional renderers ground visible feet per frame. Masks retain the original
+  -- frame anchors; explicit hops/flight are provided by actor movement.
   if groundPadding==nil and image.newImageData then
    local ok,data=pcall(image.newImageData,image)
    if ok and data and data.getPixel then
     local padding=h
+    groundPaddingByFrame={}
     for frame=0,(frames or 1)-1 do
      for y=h-1,0,-1 do
       local opaque=false
-      for x=0,w-1 do local _,_,_,a=data:getPixel(x,frame*h+y);if a>0 then opaque=true;break end end
-      if opaque then padding=math.min(padding,h-1-y);break end
+      for x=0,w-1 do local _,_,_,a=data:getPixel(x,frame*h+y);if a>=.5 then opaque=true;break end end
+      if opaque then groundPaddingByFrame[frame]=h-1-y;padding=math.min(padding,h-1-y);break end
      end
     end
     groundPadding=padding<h and padding or 0
@@ -35,6 +36,7 @@ return function(mod, base)
    end
   end
   spr.groundPadding=groundPadding
+  spr.groundPaddingByFrame=groundPaddingByFrame
   A.sprites[id]=spr;return spr
  end
  function A.add(id,map,x,y,graphics)

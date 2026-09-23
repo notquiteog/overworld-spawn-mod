@@ -87,7 +87,7 @@ return function(mod,Actors)
      love.graphics.draw(spr.image,spr.quads[i],0,i*h)
     end
    end
-   love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,w,h,9,hidden and 0 or spr.groundPadding);cache[key]=nextId
+   love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,w,h,9,hidden and 0 or spr.groundPadding,not hidden and spr.groundPaddingByFrame or nil);cache[key]=nextId
   end
   row.graphicsId=cache[key]
  end
