@@ -1,5 +1,11 @@
 ## 2.4.0 — 2026-09-22
 
+## 2.4.1
+
+Numbered release of the tested 2.4.1-test.1 grounding update. Optional renderers receive per-frame visible-foot anchors, including grass, silhouette and faded variants. Explicit jump and ride heights remain intact. Runtime behavior is unchanged apart from version metadata; no Battle Art dependency.
+
+Prior exact test archive passed the grounding regressions and rendered cross-generation fixtures. The coordinated scenery carts retain the same companion defaults.
+
 Includes cross-generation settings and provider integration, Gen3 HGSS overworld art, shared direct catching and stable sprite foot baselines. A brief Crystal spawn-reveal nil-pose warning remains documented.
 
 Numbered release of the tested 2.4.0-test.3 build. Runtime and assets are unchanged except version metadata; packaging and cart pins are refreshed. Validation from the prior exact releases remains applicable: official Gen1Recomp 0.3.1, isolated profiles, targeted native rendering/integration checks. This release does not claim complete cross-generation feature or visual parity.

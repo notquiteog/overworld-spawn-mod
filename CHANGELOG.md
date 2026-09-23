@@ -1,3 +1,9 @@
+## 2.4.1 — 2026-09-23
+
+Numbered release of the tested 2.4.1-test.1 grounding update. Optional renderers receive per-frame visible-foot anchors, including grass, silhouette and faded variants. Explicit jump and ride heights remain intact. Runtime behavior is unchanged apart from version metadata; no Battle Art dependency.
+
+Prior exact test archive passed the grounding regressions and rendered cross-generation fixtures. The coordinated scenery carts retain the same companion defaults.
+
 ## 2.4.1-test.1 — 2026-09-23
 
 Expose per-frame visible-foot anchors for native overworld Pokémon. Grass immersion, silhouettes and faded variants inherit the original frame anchors. Optional renderers can ground each frame without flattening real jump/ride heights. No dependency on Battle Art.
