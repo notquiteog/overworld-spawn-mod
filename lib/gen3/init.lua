@@ -12,6 +12,7 @@ return function(mod)
  local S={map=nil,spawns={},elapsed=0,nextId=0,follower=nil,shared=nil,cache={},trail={}}
  local schema=mod.options:define({
   {key='gen3_visible_wilds',label='VISIBLE WILDS',type='toggle',default=true},
+  {key='gen3_sprite_art',label='OVERWORLD ART',type='choice',default='hgss',choices={{'HGSS','hgss'},{'CLASSIC','classic'}}},
   {key='gen3_follower',label='FOLLOWER',type='toggle',default=true},
   {key='gen3_random_encounters',label='RANDOM ENCOUNTERS',type='toggle',default=true},
   {key='catch_hud_size',label='CATCH HUD',type='choice',default=0,choices={{'HIDDEN',0}}},
@@ -25,12 +26,18 @@ return function(mod)
  end
  local function sprite(species)
   species=tonumber(species);if not species then return nil end
-  local id=Actors.base+species
+  local hgss=mod.options:get('gen3_sprite_art')~='classic'
+  local id=Actors.base+species+(hgss and 1000 or 0)
   if Actors.sprites[id]then return id end
   -- The mod's already-shipped six-frame sheets; duplicate the walking rows
   -- to the native nine-frame layout so both renderers share the same pose.
   local national=Pokemon.national and Pokemon.national(species) or species
-  local bytes=mod:read(('assets/enhanced_overworld/poke_followers/follower_%03d_normal.png'):format(national))
+  local bytes=hgss and mod:read(('assets/hgss/%d-normal-9.png'):format(national))
+  if bytes then
+   local ok,img=pcall(function()return love.graphics.newImage(love.filesystem.newFileData(bytes,'hgss.png'))end)
+   if ok then img:setFilter('nearest','nearest');Actors.sprite(id,img,32,32,9);return id end
+  end
+  bytes=mod:read(('assets/enhanced_overworld/poke_followers/follower_%03d_normal.png'):format(national))
   if bytes then
    local ok,image=pcall(function()return love.graphics.newImage(love.filesystem.newFileData(bytes,'follower.png'))end)
    if ok then

@@ -1,3 +1,9 @@
+## 2.4.0-test.1 — 2026-09-22
+
+User-supplied HGSS walking sprites are the Gen 3 default for visible wilds and followers. Gen 1/2 retain their existing defaults; select the existing HGSS option to use the supplied art.
+
+**TEST PRERELEASE — published before gameplay testing at the user’s request.** Build/compile validation only at publication. Gen 1 online doubles and the new door/healing projection require native gameplay verification; advanced move effects and disconnect combinations may need corrections. Existing stable releases remain unchanged.
+
 ## 2.3.1 — 2026-09-22
 
 FireRed/LeafGreen followers follow the actual vacated-cell trail, reset on teleports and stay hidden while mounted. Airborne players cannot claim visible encounters. Ride remains optional.

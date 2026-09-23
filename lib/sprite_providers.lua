@@ -310,6 +310,13 @@ function SpriteProviders:_makePokemmoProvider()
         return nil, nil, "dex unresolved"
       end
       local want = normalizeVariant(variant)
+      local supplied = ('assets/hgss/%d-%s-6.png'):format(dex,want=='shiny' and 'shiny' or 'normal')
+      if mod:read(supplied) then
+        local path=render:_modAssetPath(supplied)
+        if path then return {image=path,frames=6,walker=true,trueColor=true,frameWidth=32,frameHeight=32,
+          id='SPRITE_HGSS_'..dex..'_'..want}, {providerId=SpriteProviders.ID.POKEMMO,
+          relativePath=supplied,loadPath=path,usedVariant=want,frames=6,walker=true,bodyRenderer='NATIVE_SPRITE_RENDERER'},nil end
+      end
       local def, usedVariant, loadPath, rel = sheets:spriteDef(dex, want)
       if not def then
         return nil, nil, "no pokemmo sheet for dex " .. tostring(dex)

@@ -1,3 +1,5 @@
+> Test build 2.4.0-test.1: User-supplied HGSS walking sprites are the Gen 3 default for visible wilds and followers. Gen 1/2 retain their existing defaults; select the existing HGSS option to use the supplied art. Gameplay verification pending.
+
 **2.3.1: Native follower trails and riding integration.** FireRed/LeafGreen followers follow the actual vacated-cell trail, reset on teleports and stay hidden while mounted. Airborne players cannot claim visible encounters. Ride remains optional.
 
 Known limits: Shared overworld throwing remains disabled; granted native battles retain normal catching.
