@@ -1,3 +1,9 @@
+## 2.4.0 — 2026-09-22
+
+Includes cross-generation settings and provider integration, Gen3 HGSS overworld art, shared direct catching and stable sprite foot baselines. A brief Crystal spawn-reveal nil-pose warning remains documented.
+
+Numbered release of the tested 2.4.0-test.3 build. Runtime and assets are unchanged except version metadata; packaging and cart pins are refreshed. Validation from the prior exact releases remains applicable: official Gen1Recomp 0.3.1, isolated profiles, targeted native rendering/integration checks. This release does not claim complete cross-generation feature or visual parity.
+
 ## 2.4.0-test.3 — 2026-09-22
 
 Publish native sprite ground-padding metadata from each animation’s shared opaque baseline. Grass-cut and faded variants retain the original anchor; authored PMD anchors and hidden markers remain explicit. Optional renderers can align feet without erasing walking hops or sinking masked sprites. No companion mod is required. Seven grounding assertions and the 53-assertion native settings suite pass; visual verification follows the new packaged build.

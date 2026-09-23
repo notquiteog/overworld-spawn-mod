@@ -1,3 +1,9 @@
+## 2.4.0 — 2026-09-22
+
+Includes cross-generation settings and provider integration, Gen3 HGSS overworld art, shared direct catching and stable sprite foot baselines. A brief Crystal spawn-reveal nil-pose warning remains documented.
+
+Numbered release of the tested 2.4.0-test.3 build. Runtime and assets are unchanged except version metadata; packaging and cart pins are refreshed. Validation from the prior exact releases remains applicable: official Gen1Recomp 0.3.1, isolated profiles, targeted native rendering/integration checks. This release does not claim complete cross-generation feature or visual parity.
+
 > **Test build 2.4.0-test.3:** All 24 shared settings now have native Gen3 behavior, including density, behaviors, follower selection/control, water presentation and direct catching. HGSS walking sprites are the Gen3 overworld default; Gen1/2 retain GSC. Other mods remain optional.
 
 Optional Online integration supports host-authorized direct catches in all three generations. Hosts validate and reserve each visible target; only a successful native capture removes it. Full storage, rejected claims and failed catches retain the host's bird or Pokémon.
