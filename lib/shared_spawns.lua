@@ -4,6 +4,7 @@ local V = ...
 local Config = V.require('config')
 local GameCompat = V.require('game_compat')
 local Movement = V.require('movement')
+local SharedCatch = V.require('catching/shared')
 return function(mod, logic, render, ambient)
   local A = {version=1}
   local authority, cache, lastMap = nil, {}, nil
@@ -32,7 +33,7 @@ return function(mod, logic, render, ambient)
     local map=ow.map
     return function(x,y)
       if x<0 or y<0 or x>=map.widthCells or y>=map.heightCells then return end
-      if map:warpAtCell(x,y) or logic:isStoryReservedCell(g,mapId,x,y) then return end
+      if map:warpAtCell(x,y) or logic:isStoryReservedCell(game(),mapId,x,y) then return end
       for _,e in ipairs(ow.entities)do if e.cellX==x and e.cellY==y then return end end
       if map:isWaterCell(x,y)then return 'water' end
       if map:isWalkableCell(x,y) and map:isGrassCell(x,y)then return 'land' end
@@ -47,6 +48,10 @@ return function(mod, logic, render, ambient)
       pick=function(map,terrain)return EncounterPick.pick(logic:_encDef(map,game()),love.math.random,terrain=='water' and 'water' or 'grass')end,
       count=Config.maxVisible(mod),random=love.math.random}or nil
     cache={};lastMap=nil;logic.sharedAuthority=config
+    if logic.catching then
+      logic.catching.sharedPending=nil
+      if logic.catching.phase=='awaiting_host' then logic.catching.phase='idle' end
+    end
     logic:clearAll()
     local ow=world()
     town.configure(config,ow)
@@ -61,10 +66,13 @@ return function(mod, logic, render, ambient)
       if r.mapId==map and e and r.state==Config.STATE.AVAILABLE and not e.wildsAmbientPokemon then
         r.networkId=r.networkId or ((authority and authority.session or 'offline')..':'..id)
         e.sharedWild=authority~=nil
+        e.sharedCatchable=authority and authority.catching==true or false
         rows[#rows+1]={id=r.networkId,species=r.species,level=r.level,
           x=e.cellX,y=e.cellY,px=e.px,py=e.py,facing=e.facing,moving=e.moving,
           phase=Movement.walkPhase(e),surface=r.surface,encounterKind=r.encounterKind,
-          visibleSprite=r.visibleSprite,hiddenEncounter=r.hiddenEncounter,terrain=r.surface=='WATER' and 'water' or 'land'}
+          visibleSprite=r.visibleSprite,hiddenEncounter=r.hiddenEncounter,
+          scenery=e.caveScenery==true,behavior=e.behavior,shiny=e.shiny,variant=e.variant,
+          terrain=r.surface=='WATER' and 'water' or 'land'}
       end
     end
     if authority then for _,row in ipairs(town.snapshot(ow))do rows[#rows+1]=row end end
@@ -88,7 +96,8 @@ return function(mod, logic, render, ambient)
       if not r then
         r={id='shared_'..wire.id,networkId=wire.id,mapId=map,x=wire.x,y=wire.y,
           species=wire.species,level=wire.level,state=Config.STATE.AVAILABLE,
-          surface=wire.surface,encounterKind=wire.encounterKind,visibleSprite=wire.visibleSprite,hiddenEncounter=wire.hiddenEncounter}
+          surface=wire.surface,encounterKind=wire.encounterKind,visibleSprite=wire.visibleSprite,hiddenEncounter=wire.hiddenEncounter,
+          caveScenery=wire.scenery,shiny=wire.shiny,variant=wire.variant}
         local e=render:makeEntity(game(),r)
         if e then
           if authority and authority.role=='host' then
@@ -97,6 +106,7 @@ return function(mod, logic, render, ambient)
             local region=V.require('spawn_regions').regionForCell(regions or {},wire.x,wire.y)
             local behavior=wire.hiddenEncounter and (wire.surface=='WATER' and Behavior.WATER_IDLE or Behavior.HIDDEN_GRASS)
               or (wire.surface=='WATER' and Behavior.WATER_WANDER or Behavior.GRASS_WANDER)
+            if wire.behavior and Behavior[wire.behavior]==wire.behavior then behavior=wire.behavior end
             Behavior.attach(e,behavior,region)
             e.visibleSprite=wire.visibleSprite;e.hiddenEncounter=wire.hiddenEncounter
             e.facing=wire.facing or 'down';e.movement.facing=e.facing
@@ -111,6 +121,9 @@ return function(mod, logic, render, ambient)
         local e=logic.entities[r.id]
         if e then
           e.sharedWild=true
+          e.sharedCatchable=authority and authority.catching==true or false
+          e.caveScenery=wire.scenery==true
+          e.shiny=wire.shiny;e.variant=wire.variant
           if authority and authority.role=='guest' then
             e.sharedPose=wire
             e.sharedTargetX=wire.px or wire.x*16;e.sharedTargetY=wire.py or wire.y*16
@@ -135,7 +148,7 @@ return function(mod, logic, render, ambient)
     return rows
   end
   function A.beginEncounter(wire,map)
-    if wire.ambient then return false,'not a wild encounter' end
+    if wire.ambient or wire.scenery then return false,'not a wild encounter' end
     local ow=world()
     if not authority or not ow or not ow.map or ow.map.id~=map or logic.pendingBattle
       or (ow.busy and ow:busy())then return false,'field unavailable' end
@@ -145,6 +158,20 @@ return function(mod, logic, render, ambient)
     local ok,err=GameCompat.startWildBattle(mod.world,wire.species,wire.level,game())
     if ok then logic.pendingBattle={id=wire.id,species=wire.species,level=wire.level}end
     return ok,err
+  end
+  function A.canCatch(position,wire,action,map)
+    local ow=world()
+    if not ow or not ow.map or ow.map.id~=map then
+      local ok,remote=pcall(makeWorld,map,position or {})
+      ow=ok and remote or nil
+    end
+    return SharedCatch.canCatch(logic,game(),ow,position,wire,action)
+  end
+  function A.beginCatch(wire,map,action)
+    return SharedCatch.begin(logic.catching,game(),world(),wire,map,action)
+  end
+  function A.catchDenied(map,id,reason)
+    SharedCatch.denied(logic.catching,map,id,reason)
   end
   mod.hooks:wrap('input.step',function(nextFn,g,dt)
     nextFn(g,dt)

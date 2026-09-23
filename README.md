@@ -1,14 +1,8 @@
-> Test build 2.4.0-test.1: User-supplied HGSS walking sprites are the Gen 3 default for visible wilds and followers. Gen 1/2 retain their existing defaults; select the existing HGSS option to use the supplied art. Gameplay verification pending.
+> **Test build 2.4.0-test.2:** All 24 shared settings now have native Gen3 behavior, including density, behaviors, follower selection/control, water presentation and direct catching. HGSS walking sprites are the Gen3 overworld default; Gen1/2 retain GSC. Other mods remain optional.
 
-**2.3.1: Native follower trails and riding integration.** FireRed/LeafGreen followers follow the actual vacated-cell trail, reset on teleports and stay hidden while mounted. Airborne players cannot claim visible encounters. Ride remains optional.
+Optional Online integration supports host-authorized direct catches in all three generations. Hosts validate and reserve each visible target; only a successful native capture removes it. Full storage, rejected claims and failed catches retain the host's bird or Pokémon.
 
-Known limits: Shared overworld throwing remains disabled; granted native battles retain normal catching.
-
-Requires Gen1Recomp 0.3.1 for the verified Gen 3 path. Other mods are optional; no ROM, player save or import cache is included.
-
-**2.3.0: Gen 3 wilds and synchronized room encounters.** Adds native Gen 3 visible wild Pokémon and followers, independent in-game settings, and optional Online room integration. Hosts own shared wild and ambient populations; guests render host snapshots and request exclusive encounters.
-
-Gen 3 follower collision trails and ride suppression need more work. Shared overworld throwing is disabled; granted native encounters retain battle catching.
+Targets Gen1Recomp 0.3.1. Capture/settings tests pass; gameplay and multiplayer QA follow the packaged test release. Native presentation depth and unverified cases are listed in [the generation coverage inventory](docs/GENERATION_SETTINGS_PARITY.md). No ROM, player save or import cache is included.
 
 # Wilds of Kanto
 
@@ -18,8 +12,8 @@ Wilds of Kanto makes Kanto feel alive in
 Wild Pokémon appear in the overworld, react to the player, and can be followed
 by party Pokémon — without replacing the classic Gen 1 feel.
 
-It also includes **experimental Pokémon Gold / Gen 2 support (beta)**.
-The mod targets **Gen 1 + Gen 2** in Gen1Recomp's Mod Manager.
+The mod targets **Gen1, Gen2 and native Gen3** in Gen1Recomp's Mod Manager.
+Gen2 and FireRed/LeafGreen support remain test-release features.
 
 **2.2.0** adds optional **PMDCollab** overworld sprites and independent
 dialogue portraits, derived from
@@ -40,7 +34,7 @@ Huge shoutout to that project and its contributors — see below.
   can consume variable SpriteDef geometry; PMDCollab keeps native imported sizes
 - PMDCollab dialogue portraits for Wilds Pokémon talk (followers, town Pokémon,
   generic cries) — independent of the selected overworld Sprite Style
-- Red / Blue / Yellow, plus experimental Pokémon Gold (beta)
+- Red / Blue / Yellow, Gen2, and native FireRed / LeafGreen
 - Safari compatibility
 - Stable species-based sprite identity (reordered Pokédex / Fakemon mods keep
   the correct Wilds art, or the missing-sprite fallback)
@@ -119,7 +113,7 @@ There is no second settings store. Defaults match `options.lua`.
 | Setting | Values | Default | Description |
 |---------|--------|---------|-------------|
 | Show Wild Mons | On / Off | On | Spawn visible wild Pokémon in eligible areas. |
-| Sprite Style | Poke Followers / GSC · HGSS / PokeMMO · Pokédex · PMDCollab | Poke Followers / GSC | Overworld sprite style for wilds and followers. GSC uses Classic (16×16); HGSS uses True Size; PMDCollab uses native imported geometry with directional walk and occasional idle animations. Dialogue portraits are separate (always PMDCollab for supported Wilds Pokémon talk). |
+| Sprite Style | Poke Followers / GSC · HGSS / PokeMMO · Pokédex · PMDCollab | GSC (Gen1/2), HGSS (Gen3) | Overworld sprite style for wilds and followers. GSC uses Classic (16×16); HGSS uses True Size; PMDCollab keeps imported geometry. Gen1/2 also support its variable-duration animations and dialogue portraits; native Gen3 uses directional poses and native text. |
 | Sprite Fade | Solid / Faded | Solid | Opacity of normal wild sprites (Solid = fully opaque). Does not affect followers, Town Pokémon, silhouettes, or UI. |
 | Spawn Amount | Low / Normal / High / Very High | Normal | How many visible overworld Pokémon can appear (including water). |
 | Random Enc | On / Off | On | Classic step-based random encounters. Visible overworld Pokémon stay active. |
@@ -184,6 +178,8 @@ Legacy Followers EX / PokéPC installs are detected only for settings migration.
 - Pokémon Blue
 - Pokémon Yellow
 - Pokémon Gold (beta)
+- Pokémon Silver / Crystal (Gen2 test builds)
+- Pokémon FireRed / LeafGreen (native Gen3 test builds)
 - Dramatic Shape Voxel Mod (True Size stays on when the **active** Voxel
   renderer can consume variable SpriteDef geometry: Battle Art Voxel, Potato
   Voxel, Dramaless Shape, and Stadium2 via public `SpriteBillboards`. Original

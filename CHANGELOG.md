@@ -1,3 +1,11 @@
+## 2.4.0-test.2 — 2026-09-22
+
+- Wire all 24 shared options to native Gen3 behavior: density and behavior choices, water/cave rules, art presentation, selected party followers and control modes, and configurable charged direct throws.
+- Add host-authorized direct catching across Gen1/2/3, with strict collision/range validation, native capture/storage/dex bookkeeping and release on failure. Online remains optional.
+- Preserve supplied native capture personalities and explicit shiny appearance; followers use native shiny identity. Keep simulation moving during ordinary player steps.
+- HGSS is the native Gen3 overworld default; Gen1/2 keep GSC. All companion integrations remain optional.
+- Validation: 17 focused capture/settings files pass, including 104 native Gen1/2 capture assertions and 53 native Gen3 logic assertions. Gameplay, controller, all-map presentation and long-running multiplayer QA follow the packaged test release. See `docs/GENERATION_SETTINGS_PARITY.md` for exact remaining differences.
+
 ## 2.4.0-test.1 — 2026-09-22
 
 User-supplied HGSS walking sprites are the Gen 3 default for visible wilds and followers. Gen 1/2 retain their existing defaults; select the existing HGSS option to use the supplied art.

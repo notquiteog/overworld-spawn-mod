@@ -16,6 +16,7 @@ local CatchInput = V.require("catching/input")
 local CatchBindings = V.require("catching/bindings")
 local CatchSfx = V.require("catching/catch_sfx")
 local DebugLog = V.require("debug_log")
+local SharedCatch = V.require("catching/shared")
 
 local OverworldCatching = {}
 OverworldCatching.__index = OverworldCatching
@@ -287,7 +288,7 @@ function OverworldCatching:canAcceptInput(game, ow)
   if not self:playerHasControl(game, ow) then return false end
   if self:safariBlocks(game, ow) then return false end
   if self.projectile:isBusy() then return false end
-  if self.phase == "capturing" or self.phase == "resolving" or self.phase == "flying" then
+  if self.phase == "capturing" or self.phase == "resolving" or self.phase == "flying" or self.sharedPending then
     return false
   end
   return true
@@ -385,7 +386,7 @@ function OverworldCatching:_startCatchProjectile(game, ow, ballType, opts)
   local ok, err = self.projectile:startFlight(game, ow, opts)
   if ok then return true end
   self:_goldCatchStage("PROJECTILE_CREATE failed: " .. tostring(err))
-  self:_refundBall(game, ballType)
+  if opts.refundOnFailure~=false then self:_refundBall(game, ballType) end
   if self.activeCapture and self.activeCapture.entity then
     self:_unlockTarget(self.activeCapture.entity, { reattach = true, restoreVisible = true })
   end
@@ -697,6 +698,8 @@ function OverworldCatching:_releaseThrow(game, ow)
     tostring(hit.distance),
     tostring(hit.kind))
 
+  if SharedCatch.request(self,game,ow,hit,power,ballType) then return end
+
   -- Consume on commit (hit, easter egg, or miss).
   if not self:consumeBall(game, ballType) then
     pushText(game, self.mod, "You don't have any\nPOKé BALLs!")
@@ -847,6 +850,31 @@ function OverworldCatching:_releaseThrow(game, ow)
   end
   self:_catchLog("projectile")
   self:_catchLog("projectile started (hit)")
+end
+
+-- Outcome is already stored by the reserved host grant. This flight/wobble is
+-- presentation only: it never rolls, stores, removes, or retargets an actor.
+function OverworldCatching:showSharedResult(game,ow,row,ball,pending,result)
+  self.phase='flying'
+  self.hud:showFeedback(result.message,1.5)
+  self:_startCatchProjectile(game,ow,ball,{
+    refundOnFailure=false,
+    ballType=ball,spriteId='SPRITE_WILDS_BALL_'..ball,image=self:ballImage(ball),
+    startX=pending.x,startY=pending.y,facing=pending.facing,power=pending.power,
+    miss=false,hitKind=Target.HitKind.WILD,
+    onImpact=function(proj)
+      playCatch(game,'impact')
+      self.phase='capturing'
+      self.projectile:beginWobble(game,ow,{
+        x=row.x,y=row.y,ballEntity=proj and proj.ballEntity or self.projectile._trackedBall,
+        caught=result.caught,totalShakes=result.shakes,
+        onResolve=function()
+          self.phase='idle';self.activeCapture=nil
+          pushText(game,self.mod,result.message)
+        end,
+      })
+    end,
+  })
 end
 
 function OverworldCatching:_onBallImpact(game, ow, proj)
@@ -1266,6 +1294,15 @@ function OverworldCatching:update(dt, source)
 
   local game = self:game()
   local ow = self:overworld()
+  if self.sharedPending then
+    local pending=self.sharedPending
+    pending.left=pending.left-dt
+    if pending.left<=0 or not ow or not ow.map or ow.map.id~=pending.map
+        or pending.authority~=self.logic.sharedAuthority then
+      self.sharedPending=nil
+      if self.phase=='awaiting_host' then self.phase='idle' end
+    end
+  end
   self:pollInput(game, ow, dt)
   RangePreview.sync(self)
 

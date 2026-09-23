@@ -24,6 +24,7 @@
 -- DramaticShapeVoxelMod is optional; base Gen1Recomp 2D rendering is enough.
 
 return function(mod)
+  mod.exports.version = "2.4.0-test.2"
   local GV=require("src.core.GameVersion")
   if GV.generation()==3 then return assert((loadstring or load)(assert(mod:read("lib/gen3/init.lua")),"@wilds/gen3/init"))()(mod) end
   local V = { mod = mod, path = mod.path }
@@ -533,7 +534,6 @@ return function(mod)
 
   -- ------- exports (companion / debug / test surface)
 
-  mod.exports.version = "2.4.0-test.1"
   mod.exports.gameCompat = GameCompat
   mod.exports.supportsFeature = function(feature)
     return supports(feature)

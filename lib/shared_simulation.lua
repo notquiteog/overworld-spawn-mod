@@ -14,6 +14,8 @@ function M.new(opts)
     old.rows=keep;S.maps[map]=old
   end
   function S.snapshot(map,player,dt)
+    local count=type(opts.count)=='function'and opts.count()or opts.count or 6
+    if count<=0 then return {}end
     local state=S.maps[map]
     if not state then
       local terrain=opts.describe(map)
@@ -24,14 +26,14 @@ function M.new(opts)
         local x,y=player.x+rng(-10,10),player.y+rng(-8,8)
         local kind=terrain(x,y)
         local key=x..':'..y
-        if kind and not occupied[key] and math.abs(x-player.x)+math.abs(y-player.y)>2 then
+        if kind and(not opts.allowTerrain or opts.allowTerrain(kind))and not occupied[key] and math.abs(x-player.x)+math.abs(y-player.y)>2 then
           local mon=opts.pick(map,kind)
           if mon then
             S.serial=S.serial+1;local id=opts.session..':remote:'..map..':'..S.serial
             state.rows[#state.rows+1]={id=id,x=x,y=y,px=x*16,py=y*16,facing='down',moving=false,
               terrain=kind,surface=kind=='water' and 'WATER' or 'GRASS',encounterKind=kind=='water' and 'water' or 'grass',
-              species=mon.species,level=mon.level,visibleSprite=true,hiddenEncounter=false}
-            occupied[key]=true;if #state.rows>=(opts.count or 6)then break end
+              species=mon.species,level=mon.level,behavior=mon.behavior,visibleSprite=mon.behavior~='hidden',hiddenEncounter=mon.behavior=='hidden'}
+            occupied[key]=true;if #state.rows>=count then break end
           end
         end
       end
@@ -50,8 +52,13 @@ function M.new(opts)
         r.moving=false;state.timers[r.id]=(state.timers[r.id]or(1+rng()*2))-dt
         if state.timers[r.id]<=0 and state.terrain then
           state.timers[r.id]=1+rng()*2
-          local d=dirs[rng(4)];local x,y=r.x+d[1],r.y+d[2]
-          local free=state.terrain(x,y)==r.terrain and not(x==player.x and y==player.y)
+          local d=dirs[rng(4)]
+          if r.behavior=='aggressive'and math.abs(player.x-r.x)+math.abs(player.y-r.y)<=5 then
+            local dx,dy=player.x-r.x,player.y-r.y
+            if math.abs(dx)>math.abs(dy)then d=dx>0 and dirs[4]or dirs[3]else d=dy>0 and dirs[2]or dirs[1]end
+          end
+          local x,y=r.x+d[1],r.y+d[2]
+          local free=r.behavior~='idle'and r.behavior~='hidden'and state.terrain(x,y)==r.terrain and not(x==player.x and y==player.y)
           for _,other in ipairs(state.rows)do if other~=r and other.x==x and other.y==y then free=false end end
           if free then r.x,r.y,r.facing=x,y,d[3]end
         end

@@ -350,6 +350,7 @@ function Gen1.createCaughtPokemon(game, species, level, context)
     if ok then newMon = mon end
   end
   if not newMon then
+    if context.strict then return nil, 'native Pokemon.new failed' end
     newMon = { species = species, level = level, hp = 1, stats = { hp = 1 } }
   end
   if context.shiny then newMon.shiny = true end

@@ -1,7 +1,7 @@
 -- Sharing metadata. Read by tooling and the manager detail pane;
 -- never by the loader's merge.
 return {
-  summary = "Visible and reactive wild Pokemon for the Gen 1 overworld. Roaming, hidden and aggressive encounters across grass, caves and water. Does not change the player spawn.",
+  summary = "Visible wild Pokemon, followers, live settings and direct catching across Gen1, Gen2 and native Gen3. Optional shared encounters remain host-owned.",
   author = "YoDrehDenSwagAuf",
   contact = "https://github.com/notquiteog/overworld-spawn-mod",
   tags = { "overworld", "encounters", "gameplay", "voxel-compatible", "diagnostics" },
@@ -13,6 +13,8 @@ return {
       "wild Pokemon render via native SpriteRenderer sheets (same contract as trainers)",
     },
     added = {
+      "native Gen3 implements the same 24 option keys; HGSS overworld art is its default while Gen1/2 retain GSC defaults",
+      "host-reserved direct captures use native inventory, construction, storage and dex bookkeeping in all three generations",
       "data-driven overworld wild Pokemon entities on grass, cave, and surf-water tiles",
       "aggressive spotting with engine exclamation emote and chase",
       "hidden grass shake / cave dust encounter markers",
@@ -33,6 +35,9 @@ return {
       "Voxel-compatible: Dramatic Shape SpriteBillboards, First Person, depth, grass, shadows",
     },
     known = {
+      "native Gen3 PMD art uses nine directional frames; native follower/town dialogue and Dev Overlay have less presentation depth than Gen1",
+      "native Gen3 roster generation does not roll shiny identity; supplied direct-catch PID and shiny overrides are preserved",
+      "all-generation preview logic checks pass; packaged gameplay and controller verification follow release publication",
       "species overworld sprites prefer assets/generated/followsprites_runtime/ "
         .. "(16x96, frames=6, walker=true); legacy battle fronts remain as fallback",
       "follow-sprite source PNGs stay in the package for rebuild / flat optional paths",
