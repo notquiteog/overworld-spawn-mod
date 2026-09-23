@@ -1,3 +1,7 @@
+## 2.4.0-test.3 — 2026-09-22
+
+Publish native sprite ground-padding metadata from each animation’s shared opaque baseline. Grass-cut and faded variants retain the original anchor; authored PMD anchors and hidden markers remain explicit. Optional renderers can align feet without erasing walking hops or sinking masked sprites. No companion mod is required. Seven grounding assertions and the 53-assertion native settings suite pass; visual verification follows the new packaged build.
+
 ## 2.4.0-test.2 — 2026-09-22
 
 - Wire all 24 shared options to native Gen3 behavior: density and behavior choices, water/cave rules, art presentation, selected party followers and control modes, and configurable charged direct throws.

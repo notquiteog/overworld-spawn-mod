@@ -94,3 +94,8 @@ catching trainer's OT differs. Native Wilds does not currently generate shiny
 identities when populating its roster; ordinary offline direct catches retain
 the native capture constructor's PID roll. A roster-wide shiny encounter roll
 and export-level PID/OT identity across multiple trainers are not implemented.
+
+Native sprite records now expose optional `groundPadding`, computed once from the
+lowest opaque footprint across every animation frame. Grass-cut/faded variants
+inherit that baseline. PMD authored anchors and hidden markers provide explicit
+zero; this metadata requires no companion mod. Seven grounding assertions pass.

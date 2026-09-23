@@ -23,7 +23,7 @@ return function(mod,Actors)
    love.graphics.setScissor(0,(i-1)*outH,outW,outH)
    love.graphics.draw(image,love.graphics.newQuad(0,row*h,w,h,iw,ih),anchorX and outW/2-anchorX or 0,(i-1)*outH+(anchorY and outH-anchorY or 0))
   end
-  love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,outW,outH,9);cache[key]=nextId;return nextId
+  love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,outW,outH,9,anchorY and 0 or nil);cache[key]=nextId;return nextId
  end
  function P.sprite(species,terrain,shiny)
   species=tonumber(species);if not species then return end
@@ -87,7 +87,7 @@ return function(mod,Actors)
      love.graphics.draw(spr.image,spr.quads[i],0,i*h)
     end
    end
-   love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,w,h,9);cache[key]=nextId
+   love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,w,h,9,hidden and 0 or spr.groundPadding);cache[key]=nextId
   end
   row.graphicsId=cache[key]
  end

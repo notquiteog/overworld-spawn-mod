@@ -1,4 +1,4 @@
-> **Test build 2.4.0-test.2:** All 24 shared settings now have native Gen3 behavior, including density, behaviors, follower selection/control, water presentation and direct catching. HGSS walking sprites are the Gen3 overworld default; Gen1/2 retain GSC. Other mods remain optional.
+> **Test build 2.4.0-test.3:** All 24 shared settings now have native Gen3 behavior, including density, behaviors, follower selection/control, water presentation and direct catching. HGSS walking sprites are the Gen3 overworld default; Gen1/2 retain GSC. Other mods remain optional.
 
 Optional Online integration supports host-authorized direct catches in all three generations. Hosts validate and reserve each visible target; only a successful native capture removes it. Full storage, rejected claims and failed catches retain the host's bird or Pokémon.
 
