@@ -12,8 +12,8 @@
 -- Keyboard choices therefore stay off those keys. Start is never a catch
 -- modifier (menu / soft-reset). Select is offered only as a preset modifier.
 local V = ...
-local Config = V.require("config")
-local DebugLog = V.require("debug_log")
+local Config = V and V.require("config")
+local DebugLog = V and V.require("debug_log")
 
 local CatchBindings = {}
 
@@ -163,5 +163,41 @@ end
 -- Test / docs surface (do not mutate).
 CatchBindings.THROW_COMBOS = THROW_COMBOS
 CatchBindings.CYCLE_COMBOS = CYCLE_COMBOS
+
+-- The same logical action aliases and desktop events work in every engine.
+CatchBindings.THROW_ALIASES = { "throw_ball", "ow_catch_throw" }
+CatchBindings.CYCLE_ALIASES = { "cycle_ball", "ow_catch_cycle" }
+function CatchBindings.input(mod, eligible)
+  local keys = { pending = {} }
+  if mod.hooks and mod.hooks.wrap then
+    mod.hooks:wrap("input.key", function(nextFn, game, ev)
+      local throw, cycle = CatchBindings.keyboardThrow(mod), CatchBindings.keyboardCycle(mod)
+      if (ev.key == throw or ev.key == cycle) and eligible(game) then
+        if ev.phase == "pressed" and not ev.isrepeat then keys.pending[ev.key] = true end
+        return true
+      end
+      return nextFn(game, ev)
+    end)
+  end
+  function keys:owns(game, key)
+    return (key == CatchBindings.keyboardThrow(mod) or key == CatchBindings.keyboardCycle(mod)) and eligible(game) or false
+  end
+  function keys:clear() self.pending = {} end
+  function keys:down(game, key, aliases, read)
+    local pressed = self.pending[key]; self.pending[key] = nil
+    local input = game and game.input
+    read = read or (input and (input.isDown or input.down))
+    if input and read then
+      local ok, value = pcall(read, input, key)
+      if ok and value then return true end
+      for _,alias in ipairs(aliases or {}) do
+        ok, value = pcall(read, input, alias)
+        if ok and value then return true end
+      end
+    end
+    return pressed or (love and love.keyboard and love.keyboard.isDown(key)) or false
+  end
+  return keys
+end
 
 return CatchBindings

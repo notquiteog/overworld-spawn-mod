@@ -10,10 +10,13 @@ return function(mod,S,Actors,busy)
  local Party=require('src.core.game3.party')
  local Catching=require('src.core.game3.battle.catching')
  local Storage=require('src.core.game3.storage')
+ local Bindings=assert((loadstring or load)(assert(mod:read('lib/catching/bindings.lua')),'@wilds/catching/bindings'))()
  local C={ball=4,charge=0,message='',cooldown=0,suppressed={}}
  local balls={4,3,2,1,6,7,8,9,10,11,12}
  local names={[1]='MASTER',[2]='ULTRA',[3]='GREAT',[4]='POKE',[6]='NET',[7]='DIVE',[8]='NEST',[9]='REPEAT',[10]='TIMER',[11]='LUXURY',[12]='PREMIER'}
  local dirs={up={0,-1},down={0,1},left={-1,0},right={1,0}}
+ local keys=Bindings.input(mod,function(game)return game and game.phase=='field' and not busy() and mod.options:get('overworld_catching') end)
+ mod.exports.ownsOverworldCatchKey=function(game,key)return keys:owns(game,key)end
  local function count(game,id)return Bag.get(game.session and game.session.bag,id)end
  local function cycle(game,dir)
   local at=1;for i,b in ipairs(balls)do if b==C.ball then at=i end end
@@ -25,8 +28,12 @@ return function(mod,S,Actors,busy)
    local x,y=Player.cellX+d[1]*step,Player.cellY+d[2]*step
    if(not Collision.isWalkable(x,y)and not Collision.isWater(x,y))or Collision.warpAt(x,y)or Objects.blocks(x,y)then return end
    if Collision.directionallyImpassable and Collision.directionallyImpassable(x-d[1],y-d[2],x,y,Player.facing)then return end
-   for _,r in pairs(S.spawns)do if r.cellX==x and r.cellY==y and not r.ambient and not r.scenery and r.behavior~='hidden' then return r end end
+   for _,r in pairs(S.spawns)do if r.cellX==x and r.cellY==y then
+    if r.ambient or r.scenery or r.behavior=='hidden' then return end
+    return r
+   end end
   end
+  return nil,{px=(Player.cellX+d[1]*range)*16,py=(Player.cellY+d[2]*range)*16}
  end
  function C.resolve(game,row,ball)
   if not row or row.ambient or row.scenery then return false,'invalid target'end
@@ -56,11 +63,22 @@ return function(mod,S,Actors,busy)
   return true,'CAUGHT '..(Pokemon.name(row.species)or'POKEMON'),shakes
  end
  local function launchVisual(row,ball,resolved)
-  local gid=Actors.base+50000
+  local gid=Actors.base+50000+ball
   if not Actors.sprites[gid]then
-   local img=love.graphics.newCanvas(8,8);love.graphics.push('all');love.graphics.setCanvas(img);love.graphics.clear(0,0,0,0)
-   love.graphics.setColor(1,.18,.2,1);love.graphics.circle('fill',4,4,3);love.graphics.setColor(1,1,1,1);love.graphics.rectangle('fill',1,4,6,3);love.graphics.pop()
-   Actors.sprite(gid,img,8,8,1)
+   local img=love.graphics.newCanvas(16,16)
+   love.graphics.push('all');love.graphics.setCanvas(img);love.graphics.clear(0,0,0,0)
+   love.graphics.setColor(1,1,1,1)
+   local ok,chrome=pcall(require,'src.ui.game3.bag_chrome')
+   local art=ok and chrome.iconImage(ball)
+   if art then
+    local w,h=art:getDimensions();love.graphics.draw(art,4,4,0,8/w,8/h)
+   else
+    -- Early/import-limited engines keep a visibly ball-specific fallback.
+    local color=({[1]={.65,.25,.8},[2]={.85,.7,.08},[3]={.2,.4,.9},[4]={1,.18,.2},[6]={.15,.65,.7},[7]={.1,.5,.9},[8]={.35,.75,.2},[9]={.8,.25,.1},[10]={.7,.75,.8},[11]={.15,.15,.18},[12]={.95,.95,.95}})[ball]
+    love.graphics.setColor(unpack(color));love.graphics.circle('fill',8,9,4)
+    love.graphics.setColor(1,1,1,1);love.graphics.rectangle('fill',4,9,8,4)
+   end
+   love.graphics.pop();img:setFilter('nearest','nearest');Actors.sprite(gid,img,16,16,1,3)
   end
   local actor=Actors.add(-1000,Map.current,Player.cellX,Player.cellY,gid)
   C.projectile={actor=actor,row=row,ball=ball,t=0,x=Player.px,y=Player.py,resolved=resolved};if not resolved then row.catching=true end
@@ -69,10 +87,14 @@ return function(mod,S,Actors,busy)
   if C.projectile or C.cooldown>0 or busy()or not mod.options:get('overworld_catching')then return false end
     local Safari=require('src.core.game3.safari')
   if Safari.isActive and Safari.isActive(game.session)then C.message='USE SAFARI BATTLE';return false end
-  local row=target(2+math.floor(math.min(1,charge or 0)*4))
-  if not row then C.message='NO WILD IN RANGE';return false end
+  local row,miss=target(2+math.floor(math.min(1,charge or 0)*4))
+  if not row and not miss then C.message='BLOCKED THROW';return false end
   if count(game,C.ball)<=0 then cycle(game,1)end
   if count(game,C.ball)<=0 then C.message='NO POKE BALLS';return false end
+  if miss then
+   if not Bag.remove(game.session.bag,C.ball,1)then return false end
+   launchVisual(miss,C.ball,true);C.message='MISS';C.cooldown=.5;return true
+  end
   if #game.session.party>=6 and not Storage.findOpenSlot(Storage.ensure(game.session))then C.message='PARTY AND PC FULL';return false end
   if S.shared then
    if S.shared.catching~=true then C.message='SHARED CATCHING UNAVAILABLE';return false end
@@ -99,7 +121,9 @@ return function(mod,S,Actors,busy)
   launchVisual(visual,ball,true)
   return true,{caught=caught,shakes=shakes or 0,message=message}
  end
- local function rawKey(key)return love.keyboard and love.keyboard.isDown(key)end
+ function C.resetInput()
+  C.wasThrow=false;C.wasCycle=false;C.charge=0;C.source=nil;C.suppressed={};keys:clear()
+ end
  function C.update(game,dt)
   C.cooldown=math.max(0,C.cooldown-dt)
   local p=C.projectile
@@ -126,23 +150,39 @@ return function(mod,S,Actors,busy)
    input.wasPressed=function(self,key)if game.phase=='field'and not busy()and C.suppressed[key]then return false end;return C.rawPressed(self,key)end
   end
   C.suppressed={}
-  if busy()or not mod.options:get('overworld_catching')then C.wasThrow=false;C.wasCycle=false;C.charge=0;return end
-  local throwKey=mod.options:get('catch_throw_key')or'c'
-  local cycleKey=mod.options:get('catch_cycle_key')or'q';if cycleKey==throwKey then cycleKey=throwKey=='q'and'e'or'q'end
-  local combo=mod.options:get('catch_throw_combo');local modifier=combo=='b_a'and'b'or combo=='select_a'and'select'
-  local down=function(key)return C.rawDown(input,key)end
-  local comboThrow=modifier and down(modifier)and down('a')
-  local throwing=rawKey(throwKey)or comboThrow
+  local throwKey,cycleKey=Bindings.keyboardThrow(mod),Bindings.keyboardCycle(mod)
+  local binding=Bindings.throwCombo(mod);local switch=Bindings.cycleCombo(mod)
+  local signature=throwKey..':'..cycleKey..':'..tostring(binding and binding.modifier)..':'..tostring(switch and switch.modifier)
+  if C.signature and C.signature~=signature then
+   local pending=keys.pending;C.resetInput();keys.pending={[throwKey]=pending[throwKey],[cycleKey]=pending[cycleKey]}
+  end
+  C.signature=signature
+  local down=function(key)return key and C.rawDown(input,key) end
+  if game.phase~='field' or busy() or not mod.options:get('overworld_catching') or down('start') then C.resetInput();return end
+  if count(game,C.ball)<=0 then cycle(game,1)end
+  local desktop=keys:down(game,throwKey,Bindings.THROW_ALIASES,C.rawDown)
+  local modifier=binding and binding.modifier
+  local comboThrow=modifier and down(modifier) and down(binding.action)
+  local throwing=desktop or comboThrow or false
+  -- Releasing the modifier cancels; releasing A with the modifier held throws.
+  if C.source=='combo' and not down(modifier) then
+   C.wasThrow=false;C.charge=0;C.source=nil
+  end
+  if not C.wasThrow and throwing then C.source=desktop and 'desktop' or 'combo' end
+  if C.source=='combo' then throwing=comboThrow or false end
   if comboThrow then C.suppressed[modifier]=true;C.suppressed.a=true end
   if throwing then C.charge=math.min(1,C.charge+dt)
-  elseif C.wasThrow then C.throw(game,C.charge);C.charge=0 end
+  elseif C.wasThrow then C.throw(game,C.charge);C.charge=0;C.source=nil end
   C.wasThrow=throwing
-  local switch=mod.options:get('catch_cycle_combo');local cm=switch=='b_dpad'and'b'or switch=='select_dpad'and'select'
-  local left,right=cm and down(cm)and down('left'),cm and down(cm)and down('right')
-  local cycling=rawKey(cycleKey)or left or right
+  C.moveCooldown=Player.moving and .27 or math.max(0,(C.moveCooldown or 0)-dt)
+  local cm=switch and switch.modifier
+  local stationary=C.moveCooldown==0 and count(game,C.ball)>0
+  local left=stationary and cm and down(cm)and down(switch.previous)
+  local right=stationary and cm and down(cm)and down(switch.next)
+  local cycling=keys:down(game,cycleKey,Bindings.CYCLE_ALIASES,C.rawDown)or left or right
   if left or right then C.suppressed[cm]=true;C.suppressed.left=true;C.suppressed.right=true end
   if cycling and not C.wasCycle then cycle(game,left and-1 or 1)end
-  C.wasCycle=cycling
+  C.wasCycle=cycling or false
  end
  mod.hooks:wrap('render.hud',function(nextFn,game,viewport)
   nextFn(game,viewport)

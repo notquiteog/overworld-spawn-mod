@@ -99,3 +99,7 @@ Native sprite records now expose optional `groundPadding`, computed once from th
 lowest opaque footprint across every animation frame. Grass-cut/faded variants
 inherit that baseline. PMD authored anchors and hidden markers provide explicit
 zero; this metadata requires no companion mod. Seven grounding assertions pass.
+
+## 2.4.2 catch input follow-up
+
+Shared keyboard events preserve quick taps and live rebindings across all three engines. Native Gen3 also reads the shared logical throw/cycle aliases, uses the selected ball's native icon, cancels interrupted charges, and permits clear-field miss throws. Optional public `ownsOverworldCatchKey` lets Ride yield its default shortcut without requiring either mod. Yellow, Crystal and LeafGreen on 0.3.20 each consumed exactly one selected Great Ball from a quick rebound G tap with the HUD hidden. Native input (61), native settings/capture (53), and official GB shared-capture (104) assertions pass. Physical-controller and new two-client gameplay checks remain outstanding.

@@ -24,7 +24,7 @@
 -- DramaticShapeVoxelMod is optional; base Gen1Recomp 2D rendering is enough.
 
 return function(mod)
-  mod.exports.version = "2.4.1"
+  mod.exports.version = "2.4.2"
   local GV=require("src.core.GameVersion")
   if GV.generation()==3 then return assert((loadstring or load)(assert(mod:read("lib/gen3/init.lua")),"@wilds/gen3/init"))()(mod) end
   local V = { mod = mod, path = mod.path }
@@ -546,6 +546,9 @@ return function(mod)
   mod.exports.follower = follower
   mod.exports.ambient = ambient
   mod.exports.catching = catching
+  mod.exports.ownsOverworldCatchKey = function(game,key)
+    return catching.desktopInput and catching.desktopInput:owns(game,key) or false
+  end
   mod.exports.handleOptionsChanged = handleOptionsChanged
   mod.exports.isBattleableWild = Config.isBattleableWild
   mod.exports.overworldCatchingEnabled = function()

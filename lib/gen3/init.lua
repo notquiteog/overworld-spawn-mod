@@ -292,8 +292,9 @@ return function(mod)
   local out={};for _,k in ipairs(keys)do out[#out+1]=tostring(get(k))end;return table.concat(out,':')
  end
  function S.update(dt)
-  local g=game();if not g or g.phase~='field' or not Map.current then return end
+  local g=game();if not g or g.phase~='field' or not Map.current then Catching.resetInput();return end
   if S.map~=Map.current then
+   Catching.resetInput()
    if S.shared and S.shared.role=='host'and S.map then local old,rows=Shared.snapshot();S.cache[old]=rows end
    S.map=Map.current;S.spawns={};Actors.clear();Followers.reset();S.signature=signature()
    if S.shared and S.cache[S.map]then Shared.apply(S.map,S.cache[S.map])else populate()end

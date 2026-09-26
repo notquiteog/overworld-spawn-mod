@@ -457,28 +457,6 @@ function OverworldCatching:_catchBootLog(game, ow)
   ))
 end
 
-local function inputDown(game, aliases)
-  local input = game and game.input
-  if input then
-    local downFunc = type(input.down) == "function" and function(k) return input:down(k) end
-                  or type(input.isDown) == "function" and function(k) return input:isDown(k) end
-    if downFunc then
-      for _, a in ipairs(aliases) do
-        local ok, v = pcall(downFunc, a)
-        if ok and v then return true end
-      end
-    end
-  end
-  if love and love.keyboard and love.keyboard.isDown then
-    for _, a in ipairs(aliases) do
-      if #a == 1 or a == "lshift" or a == "rshift" then
-        if love.keyboard.isDown(a) then return true end
-      end
-    end
-  end
-  return false
-end
-
 -- Desktop throw/cycle keys come from CatchBindings (defaults C / Q).
 -- Engine/mod aliases stay as fallbacks so existing mappings still work.
 -- Logical controller/touch combos live in CatchInput (defaults B+A / B+Dpad).
@@ -1108,6 +1086,7 @@ function OverworldCatching:_beginAggroAfterBreak(entity, record)
 end
 
 function OverworldCatching:cancelAll(reason)
+  if self.desktopInput then self.desktopInput:clear() end
   local ow = self:overworld()
   local entity = self.activeCapture and self.activeCapture.entity
   if entity and (entity.wildsCatchLocked or entity.wildsCatchPending
@@ -1164,6 +1143,11 @@ function OverworldCatching:onMapExited()
 end
 
 function OverworldCatching:pollInput(game, ow, dt)
+  if not self.desktopInput then
+    self.desktopInput = CatchBindings.input(self.mod, function(g)
+      return self:canAcceptInput(g, self:overworld())
+    end)
+  end
   if not Config.overworldCatchingEnabled(self.mod) then
     if self.meter.active or self.phase ~= "idle" or self.activeCapture then
       self:cancelAll("option off")
@@ -1188,7 +1172,7 @@ function OverworldCatching:pollInput(game, ow, dt)
   -- Desktop key path — logical LEFT/RIGHT combos are handled by catchInput.
   -- Resolve live so Catch Key / Ball Switch Key apply without restart.
   local cycleKey = CatchBindings.keyboardCycle(self.mod)
-  local cycleDown = inputDown(game, { cycleKey, CYCLE_ALIASES[1], CYCLE_ALIASES[2] })
+  local cycleDown = self.desktopInput:down(game, cycleKey, CYCLE_ALIASES)
   if cycleDown and not self.cycleHeld then
     if self:canShowHud(game, ow) and (self.phase == "idle" or self.phase == "metering") then
       self:cycleSelectedBall(game, 1)
@@ -1197,7 +1181,7 @@ function OverworldCatching:pollInput(game, ow, dt)
   self.cycleHeld = cycleDown
 
   local throwKey = CatchBindings.keyboardThrow(self.mod)
-  local throwDown = inputDown(game, { throwKey, THROW_ALIASES[1], THROW_ALIASES[2] })
+  local throwDown = self.desktopInput:down(game, throwKey, THROW_ALIASES)
 
   -- Modifier (B+A) owns release/cancel on input.step — do not treat missing C
   -- as a throw release while that path is metering.
@@ -1368,6 +1352,11 @@ function OverworldCatching:step(ctx)
 end
 
 function OverworldCatching:register()
+  if not self.desktopInput then
+    self.desktopInput = CatchBindings.input(self.mod, function(g)
+      return self:canAcceptInput(g, self:overworld())
+    end)
+  end
   if self._registered then return end
   local mod = self.mod
   self.hud:register()

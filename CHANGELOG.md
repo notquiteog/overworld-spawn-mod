@@ -1,3 +1,9 @@
+## 2.4.2 — 2026-09-26
+
+Shared keyboard event buffering preserves fast taps and live bindings across generations. Native Gen3 accepts logical throw/cycle aliases, uses the selected ball's native artwork, throws into clear empty space, cancels interrupted/rebound charges, and preserves running steering. Host catch claims still govern shared Pokemon; no inventory is consumed before a grant. Exposes optional ownsOverworldCatchKey for Ride shortcut coordination.
+
+Verified on engine 0.3.20: real Yellow/Crystal/LeafGreen quick G tap with hidden HUD consumes exactly one selected Great Ball. 61 native input, 53 native settings/capture, 104 official Gen1/2 shared-capture assertions and existing input/flow suites pass. Physical controllers and new two-client gameplay were not exercised.
+
 ## 2.4.1 — 2026-09-23
 
 Numbered release of the tested 2.4.1-test.1 grounding update. Optional renderers receive per-frame visible-foot anchors, including grass, silhouette and faded variants. Explicit jump and ride heights remain intact. Runtime behavior is unchanged apart from version metadata; no Battle Art dependency.
