@@ -21,6 +21,8 @@ love.graphics.newShader=function()return{}end
 love.graphics.newImage=function(data)return fakeImage(dimension(data.bytes,17),dimension(data.bytes,21))end
 love.graphics.newCanvas=fakeImage
 local modules={
+ ['src.core.game3.battle_bridge']={startWild=function()end},
+ ['src.core.game3.battle']={start=function()end},
  ['src.core.game3.summary_data']={isShiny=function(mon)
    local bit=require('bit');if mon.isShiny~=nil then return mon.isShiny end
    return bit.bxor(mon.otId or 0,mon.otSecretId or 0,bit.rshift(mon.personality or 0,16),bit.band(mon.personality or 0,65535))<8

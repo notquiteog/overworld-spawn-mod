@@ -32,7 +32,7 @@ function M.new(opts)
             S.serial=S.serial+1;local id=opts.session..':remote:'..map..':'..S.serial
             state.rows[#state.rows+1]={id=id,x=x,y=y,px=x*16,py=y*16,facing='down',moving=false,
               terrain=kind,surface=kind=='water' and 'WATER' or 'GRASS',encounterKind=kind=='water' and 'water' or 'grass',
-              species=mon.species,level=mon.level,behavior=mon.behavior,visibleSprite=mon.behavior~='hidden',hiddenEncounter=mon.behavior=='hidden'}
+              species=mon.species,level=mon.level,personality=mon.personality,shiny=mon.shiny,variant=mon.variant,form=mon.form,behavior=mon.behavior,visibleSprite=mon.behavior~='hidden',hiddenEncounter=mon.behavior=='hidden'}
             occupied[key]=true;if #state.rows>=count then break end
           end
         end

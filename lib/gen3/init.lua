@@ -14,6 +14,7 @@ return function(mod)
  local schema=loadfile('settings')(mod)
  local Rules=loadfile('rules')
  local function get(key)return mod.options:get(key)end
+ local Identity=loadfile('identity')(mod)
  local S={map=nil,spawns={},elapsed=0,nextId=0,shared=nil,cache={},refill=0}
  local function game()return mod.world.game end
  local function busy()
@@ -44,14 +45,16 @@ return function(mod)
   local species=tonumber(entry and (entry.species or entry[1]));if not species or not Pokemon.name(species)then return nil end
   local lo=math.max(1,tonumber(entry.minLevel or entry.level or entry[2])or 1)
   local hi=math.min(100,tonumber(entry.maxLevel or entry.level or entry[2])or lo)
-  return {species=species,level=love.math.random(lo,math.max(lo,hi)),behavior=Rules.behavior(get,love.math.random)}
+  return Identity.assign({species=species,level=love.math.random(lo,math.max(lo,hi)),behavior=Rules.behavior(get,love.math.random)})
  end
  function S.remove(row)S.spawns[row.id]=nil;Actors.rows[row.id]=nil end
  function S.spawn(species,level,x,y,terrain,opts)
   if S.shared and S.shared.role=='guest' then return nil,'host owns visible spawns' end
-  local gid=sprite(species,terrain);if not gid then return nil,'no species sprite' end
+  local identity=Identity.assign({personality=opts and opts.personality,shiny=opts and opts.shiny})
+  local gid=sprite(species,terrain,identity.shiny);if not gid then return nil,'no species sprite' end
   S.nextId=S.nextId+1;local row=Actors.add(S.nextId,Map.current,x,y,gid)
   row.networkId=(S.shared and S.shared.session or 'offline')..':'..Map.current..':'..S.nextId
+  row.personality=identity.personality;row.shiny=identity.shiny
   row.species=species;row.level=level;row.terrain=terrain or Encounter.terrainAt(x,y);row.nextMove=1+love.math.random()*2
   row.behavior=opts and opts.behavior or Rules.behavior(get,love.math.random)
   row.ambient=opts and opts.ambient;row.scenery=opts and opts.scenery
@@ -97,7 +100,7 @@ return function(mod)
    if not occupied[key]and math.abs(x-Player.cellX)+math.abs(y-Player.cellY)>2 then
     if count<target and terrain and Rules.visibleTerrain(get,terrain)and validCell(x,y,terrain)and(not cave or terrain=='water'or connected[key]or allowScenery)then
      local e=sample(Map.current,terrain)
-     if e and S.spawn(e.species,e.level,x,y,terrain,{behavior=e.behavior,scenery=scenery})then occupied[key]=true;count=count+1 end
+     if e and S.spawn(e.species,e.level,x,y,terrain,{behavior=e.behavior,scenery=scenery,personality=e.personality,shiny=e.shiny})then occupied[key]=true;count=count+1 end
     elseif town and ambient<2 and not terrain and connected[key]and validCell(x,y,'land')then
      if S.spawn(town,5,x,y,'town',{ambient=true,behavior='wander'})then occupied[key]=true;ambient=ambient+1 end
     end
@@ -110,7 +113,7 @@ return function(mod)
   if row.ambient or row.scenery then return false,'peaceful scenery'end
   local blocked,why=busy();if blocked then return false,why end
   if S.shared then return S.shared.request(S.map,row.networkId) end
-  local ok,err=mod.world:startWildBattle(row.species,row.level)
+  local ok,err=Identity.begin(row)
   if ok then S.remove(row)end
   return ok,err
  end
@@ -165,7 +168,7 @@ return function(mod)
   for _,wire in ipairs(rows)do
    local r=existing[wire.id]
    if not r then
-    local gid=sprite(wire.species,wire.terrain)
+    local gid=sprite(wire.species,wire.terrain,wire.shiny)
     if gid then
      S.nextId=S.nextId+1;r=Actors.add(S.nextId,map,wire.x,wire.y,gid)
      r.networkId=wire.id;r.species=wire.species;r.level=wire.level;r.terrain=wire.terrain
@@ -227,7 +230,7 @@ return function(mod)
  function Shared.beginEncounter(wire,map)
   if not S.shared or map~=Map.current or busy()then return false,'field unavailable' end
   -- A grant can follow a removal snapshot; don't depend on a remaining actor.
-  return mod.world:startWildBattle(wire.species,wire.level)
+  return Identity.begin(wire)
  end
  mod.exports.sharedSpawns=Shared
  local Catching=loadfile('catching')(mod,S,Actors,busy)

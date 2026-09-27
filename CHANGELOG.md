@@ -1,3 +1,9 @@
+## 2.4.3 — Stable Gen3 visible-spawn identity
+
+FireRed/LeafGreen visible Pokémon now keep their host-selected personality and shiny state in local spawns, remote-map simulation, snapshots, encounter grants, delayed native battles and capture storage. Guests show the correct variant on their first frame. The encounter shim preserves SDK validation and only enriches the owned encounter descriptor; other battles retain their native identity. No companion mod is required.
+
+Validated on Gen1Recomp 0.3.20 with native FireRed/LeafGreen encounter and capture fixtures, isolated identity/remote-roster tests, 53 settings/capture assertions, 61 input assertions, 10 grounding checks and 104 official Gen1/2 capture/storage assertions. Existing online wire fields are used; this pass does not certify the full live multiplayer matrix.
+
 ## 2.4.2 — 2026-09-26
 
 Shared keyboard event buffering preserves fast taps and live bindings across generations. Native Gen3 accepts logical throw/cycle aliases, uses the selected ball's native artwork, throws into clear empty space, cancels interrupted/rebound charges, and preserves running steering. Host catch claims still govern shared Pokemon; no inventory is consumed before a grant. Exposes optional ownsOverworldCatchKey for Ride shortcut coordination.
