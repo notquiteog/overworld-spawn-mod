@@ -6,7 +6,7 @@ local Player={cellX=1,cellY=1,px=16,py=16,facing='right'}
 local target={id=1,cellX=2,cellY=1,px=32,py=16,species=19,level=4,terrain='land'}
 local S={map='FR_ROUTE_1',spawns={[1]=target},remove=function()end}
 local game={phase='field',session={bag={},party={}},input={isDown=function(_,k)return pressed[k]or false end,wasPressed=function()return false end}}
-local blocked=false
+local blocked,battling,menuOpen=false,false,false
 local function img(w,h)return{getDimensions=function()return w,h end,setFilter=function()end}end
 love={keyboard={isDown=function(k)return pressed[k]or false end},math={random=math.random},graphics={newCanvas=img}}
 for _,k in ipairs({'push','pop','setCanvas','clear','setColor','draw','circle','rectangle'})do love.graphics[k]=function()end end
@@ -18,6 +18,8 @@ local modules={
  ['src.core.game3.bag']={get=function(b,id)return b[id]or 0 end,remove=function(b,id)if(b[id]or 0)<1 then return false end;b[id]=b[id]-1;return true end},
  ['src.core.game3.party']={giveMon=function()return true,1,{}end},
  ['src.core.game3.battle.catching']={tryCatch=function()return false,0 end},
+ ['src.core.game3.battle']={isActive=function()return battling end},
+ ['src.core.game3.runtime']={uiBusy=function()return menuOpen end},
  ['src.core.game3.storage']={ensure=function()return{}end,findOpenSlot=function()return true end},
  ['src.core.game3.safari']={isActive=function()return false end},
  ['src.ui.game3.bag_chrome']={iconImage=function(id)return img(24,24)end},
@@ -49,4 +51,10 @@ reset(4);game.session.bag[3]=2;Player.moving=true;pressed.b=true;pressed.right=t
 reset(3);local requests=0;S.shared={catching=true,request=function(_,_,req)requests=requests+1;eq(req.ballId,3,'host request carries selection');return true end}
 pressed.throw_ball=true;tick();pressed.throw_ball=false;tick();eq(requests,1,'one host reservation');eq(game.session.bag[3],3,'no ball consumed before host grant')
 reset(2);S.shared=nil;S.spawns={};pressed.throw_ball=true;tick();pressed.throw_ball=false;tick();eq(game.session.bag[2],2,'empty-field throw uses selected ball');eq(C.projectile.resolved,true,'miss cannot capture or despawn');eq(C.projectile.row.px,48,'tap miss lands two cells ahead')
+local painted=0
+for _,k in ipairs({'translate','scale','print'})do love.graphics[k]=function()painted=painted+1 end end
+options.catch_hud_size=5
+battling=true;hooks['render.hud'](function()end,game,{});eq(painted,0,'no field selector over native battle with field phase')
+battling=false;menuOpen=true;hooks['render.hud'](function()end,game,{});eq(painted,0,'no selector over native trade/menu')
+menuOpen=false;hooks['render.hud'](function()end,game,{});eq(painted>0,true,'selector returns to the playable field')
 print('PASS native catch bindings ('..n..' assertions)')

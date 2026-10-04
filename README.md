@@ -1,3 +1,11 @@
+## 2.5.0 — 2026-10-04
+
+The ball selector now yields to native Gen3 battles and trade/menu screens, including when the outer game phase remains field.
+
+Added Emerald town ecology using imported Hoenn species IDs. Preserves native encounter tables, party followers, host-owned multiplayer spawns and native catching.
+
+Tested against official Gen1Recomp 0.3.51. Existing games retain their native data and defaults. See Battle Art’s Emerald QA record for the exact integration coverage and remaining gaps.
+
 ## 2.4.3 — Stable Gen3 visible-spawn identity
 
 FireRed/LeafGreen visible Pokémon now keep their host-selected personality and shiny state in local spawns, remote-map simulation, snapshots, encounter grants, delayed native battles and capture storage. Guests show the correct variant on their first frame. The encounter shim preserves SDK validation and only enriches the owned encounter descriptor; other battles retain their native identity. No companion mod is required.

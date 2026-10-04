@@ -22,12 +22,13 @@ love.graphics.newImage=function(data)return fakeImage(dimension(data.bytes,17),d
 love.graphics.newCanvas=fakeImage
 local modules={
  ['src.core.game3.battle_bridge']={startWild=function()end},
- ['src.core.game3.battle']={start=function()end},
+ ['src.core.game3.battle']={start=function()end,isActive=function()return false end},
+ ['src.core.game3.runtime']={uiBusy=function()return false end},
  ['src.core.game3.summary_data']={isShiny=function(mon)
    local bit=require('bit');if mon.isShiny~=nil then return mon.isShiny end
    return bit.bxor(mon.otId or 0,mon.otSecretId or 0,bit.rshift(mon.personality or 0,16),bit.band(mon.personality or 0,65535))<8
  end},
- ['src.core.GameVersion']={generation=function()return 3 end},
+ ['src.core.GameVersion']={generation=function()return 3 end,get=function()return 'firered'end},
  ['src.ui.game3.party_menu']={handleInput=function()end},
  ['src.ui.game3.option_rows']={build=function()return{}end,group=function(all)return all end},
  ['src.core.game3.player']=Player,['src.core.game3.map']=Map,['src.core.game3.objects']=Objects,['src.core.game3.ow_sprites']=Sprites,

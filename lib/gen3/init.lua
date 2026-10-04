@@ -1,4 +1,4 @@
--- Native FireRed adapter. Rules use the same public settings as Gen1/Gen2;
+-- Native Gen3 adapter. Rules use the same public settings as Gen1/Gen2;
 -- all map movement and battle/capture bookkeeping remain native Gen3.
 return function(mod)
  local function loadfile(name)return assert((loadstring or load)(assert(mod:read('lib/gen3/'..name..'.lua')),'@wilds/gen3/'..name))()end
@@ -79,9 +79,12 @@ return function(mod)
   return seen
  end
  local towns={PALLET_TOWN=16,VIRIDIAN_CITY=19,PEWTER_CITY=16,CERULEAN_CITY=52,VERMILION_CITY=25,LAVENDER_TOWN=104,CELADON_CITY=133,FUCHSIA_CITY=54,SAFFRON_CITY=52,CINNABAR_ISLAND=58,INDIGO_PLATEAU=16}
+ local hoennTowns={LITTLEROOT_TOWN='POOCHYENA',OLDALE_TOWN='ZIGZAGOON',PETALBURG_CITY='WURMPLE',RUSTBORO_CITY='SKITTY',DEWFORD_TOWN='WINGULL',SLATEPORT_CITY='WINGULL',MAUVILLE_CITY='ELECTRIKE',VERDANTURF_TOWN='ROSELIA',FALLARBOR_TOWN='NUMEL',LAVARIDGE_TOWN='NUMEL',FORTREE_CITY='KECLEON',LILYCOVE_CITY='SKITTY',MOSSDEEP_CITY='WINGULL',SOOTOPOLIS_CITY='MARILL',PACIFIDLOG_TOWN='WINGULL',EVER_GRANDE_CITY='TAILLOW'}
+ local hoenn=require('src.core.GameVersion').get()=='emerald'
  local function ambientSpecies()
-  local map=tostring(Map.current):gsub('^FR_','');local species=towns[map]
-  if not species and(map:find('POKECENTER',1,true)or map:find('HOUSE',1,true))then species=52 end
+  local map=tostring(Map.current):gsub('^FR_',''):gsub('^EM_','')
+  local species=hoenn and hoennTowns[map] and Pokemon.speciesFromName(hoennTowns[map]) or not hoenn and towns[map]
+  if not species and(map:find('POKECENTER',1,true)or map:find('HOUSE',1,true))then species=hoenn and Pokemon.speciesFromName('SKITTY') or 52 end
   return species
  end
  local function populate()
@@ -135,7 +138,8 @@ return function(mod)
    local coll=layout:collAt(x,y)
    local t=types and types[layout:midAt(x,y)]
    -- Native game3.scripting.collision emits these COLL bytes from the
-   -- imported FRLG metatile attributes. No Gen 2 module or live grid swap.
+   -- imported metatile attributes (FRLG and RSE normalize to the same COLL
+   -- vocabulary). No Gen 2 module or live grid swap.
    if (t==2 or not types) and coll==0x29 then return 'water' end
    local grass=coll==0x18 or coll==0x14 or coll==0x10 or coll==0x1c
    local floor=grass or coll==0x00 or coll==0x2b
@@ -343,5 +347,5 @@ return function(mod)
  mod.exports.gen3Catching=Catching;mod.exports.gen3Followers=Followers;mod.exports.optionSchema=schema
  mod.exports.getActiveFollowerMon=function(g)return Followers.leader(g or game())end
  mod.exports.supportsFeature=function(feature)return feature=='encounters'or feature=='followers'or feature=='catching'or feature=='townPokemon'end
- mod.log:info('Native FireRed Wilds: shared settings, visible encounters, party followers and direct catching loaded')
+ mod.log:info('Native Gen3 Wilds: shared settings, visible encounters, party followers and direct catching loaded')
 end

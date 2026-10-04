@@ -9,6 +9,8 @@ return function(mod,S,Actors,busy)
  local Bag=require('src.core.game3.bag')
  local Party=require('src.core.game3.party')
  local Catching=require('src.core.game3.battle.catching')
+ local Battle=require('src.core.game3.battle')
+ local Runtime=require('src.core.game3.runtime')
  local Storage=require('src.core.game3.storage')
  local Bindings=assert((loadstring or load)(assert(mod:read('lib/catching/bindings.lua')),'@wilds/catching/bindings'))()
  local C={ball=4,charge=0,message='',cooldown=0,suppressed={}}
@@ -188,6 +190,9 @@ return function(mod,S,Actors,busy)
   nextFn(game,viewport)
   local size=tonumber(mod.options:get('catch_hud_size'))or 5
   if size<=0 or not mod.options:get('overworld_catching')or game.phase~='field'then return end
+  -- Gen 3 keeps game.phase='field' while its native battle/trade UI owns the
+  -- frame. The overworld ball selector must not paint over those screens.
+  if Battle.isActive()or Runtime.uiBusy()then return end
   local scale=(viewport.scale or 1)*(.35+size*.08)
   love.graphics.push('all');love.graphics.translate((viewport.gameX or 0)+6,(viewport.gameY or 0)+(viewport.gameHeight or viewport.height or 160)-30*scale)
   love.graphics.scale(scale,scale);love.graphics.setColor(0,0,0,.75);love.graphics.rectangle('fill',0,0,235,28)
