@@ -69,14 +69,19 @@ return function(mod,Actors)
   silhouette=silhouette or row.terrain=='water'and waterMode=='silhouettes'
   local alpha=not row.ambient and mod.options:get('sprite_fade')=='faded' and .55 or 1
   local cut=mod.options:get('pokemon_grass_render_mode')=='immersed' and Collision.isGrass and Collision.isGrass(row.cellX,row.cellY)and 5 or 0
-  local key=gid..':'..tostring(hidden)..':'..tostring(silhouette)..':'..alpha..':'..cut
+  local key=gid..':'..tostring(hidden)..':'..tostring(hidden and row.terrain=='water')..':'..tostring(silhouette)..':'..alpha..':'..cut
   if not cache[key]then
    local spr=Actors.sprites[gid];local w,h=spr.width,spr.height
    local c=love.graphics.newCanvas(w,h*9)
    love.graphics.push('all');love.graphics.setCanvas(c);love.graphics.clear(0,0,0,0)
    if hidden then
-    love.graphics.setColor(.12,.18,.22,.7)
-    for i=0,8 do love.graphics.ellipse('fill',w/2,i*h+h-4,6,2.5)end
+    -- Hidden land encounters have no visible body (as in the GB renderer).
+    -- The underwater marker is water-only: using it for grass creates dark
+    -- hovering blobs whenever the hidden behavior is randomly selected.
+    if row.terrain=='water' then
+     love.graphics.setColor(.12,.18,.22,.7)
+     for i=0,8 do love.graphics.ellipse('fill',w/2,i*h+h-4,6,2.5)end
+    end
    else
     if silhouette then
      shader=shader or love.graphics.newShader('vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) { return vec4(color.rgb, Texel(tex, tc).a * color.a); }')

@@ -1,3 +1,9 @@
+## Unreleased — Hidden grass encounter presentation
+
+Fixed dark blobs in Gen3 tall grass: hidden land/cave encounters no longer draw the underwater silhouette marker. Water markers remain intact, and cached land/water variants cannot contaminate each other. Encounter behavior, collisions, multiplayer authority and native sprite defaults are unchanged.
+
+Verified on Gen1Recomp 0.3.51 in an isolated FireRed Route 1 fixture: matched before/after renders, native 2D fallback and walking from (18,17) to (19,17). Focused presentation regression and existing Gen3 settings tests pass. This verifies the identified hidden-spawn artifact, not every possible shadow defect.
+
 ## 2.5.1 — 2026-10-04
 
 Packaging refresh for the coordinated Battle Art 1.31.0 cart release. Runtime behavior is unchanged from 2.5.0. Companions remain optional; no new gameplay or multiplayer verification is claimed. Requires Gen1Recomp 0.3.51 or newer for the bundled carts.
