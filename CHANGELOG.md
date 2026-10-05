@@ -1,3 +1,7 @@
+## 2.5.1 — 2026-10-04
+
+Packaging refresh for the coordinated Battle Art 1.31.0 cart release. Runtime behavior is unchanged from 2.5.0. Companions remain optional; no new gameplay or multiplayer verification is claimed. Requires Gen1Recomp 0.3.51 or newer for the bundled carts.
+
 ## 2.5.0 — 2026-10-04
 
 The ball selector now yields to native Gen3 battles and trade/menu screens, including when the outer game phase remains field.
