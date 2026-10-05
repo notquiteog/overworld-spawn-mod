@@ -1,4 +1,4 @@
-## Unreleased — Hidden grass encounter presentation
+## 2.5.2 — 2026-10-05 — Hidden grass encounter presentation
 
 Fixed dark blobs in Gen3 tall grass: hidden land/cave encounters no longer draw the underwater silhouette marker. Water markers remain intact, and cached land/water variants cannot contaminate each other. Encounter behavior, collisions, multiplayer authority and native sprite defaults are unchanged.
 
