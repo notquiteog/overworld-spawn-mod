@@ -1,3 +1,11 @@
+## 2.6.0 — 2026-10-10 — Gen3 native-art overworlds and full-storage feedback
+
+Native Gen3 overworlds now use Hoenn residents instead of substitute art, and the Gen3 catching HUD renders with native window frames and crisp fonts. New installs and the test picker accept only real species sprites, and emergency overlays never resurrect intentionally hidden spawn bodies. Options rows were rebalanced so long Ruby/Sapphire labels stay clear of the native value columns while cartridge rows are preserved.
+
+Direct catching fixes: when the player's party and PC storage are both full, the capture is rejected with the game's own feedback pipeline instead of silently losing the catch, and wild actors already on the field are preserved rather than torn down during storage resolution. Follower suspension now preserves the mount update chain.
+
+Verified on Gen1Recomp 0.3.37: full FireRed overworld sweep renders, Gen3 settings parity (55 assertions), shared Gen1/Gen2 catching parity (112 assertions), the 29 standalone unit tests from the release pipeline, plus focused suites for ambient versions, hidden bodies, option overflow, catch bindings, catch flow and follower control. The follower asset suite still fails on a stale expectation: it reads `follower_%03d.png` while 502 files on disk are `follower_%03d_normal.png` / `_shiny.png`; the PNGs themselves are valid. Multiplayer was not re-certified; as before, packed gameplay and controller verification follow release publication.
+
 ## 2.5.2 — 2026-10-05 — Hidden grass encounter presentation
 
 Fixed dark blobs in Gen3 tall grass: hidden land/cave encounters no longer draw the underwater silhouette marker. Water markers remain intact, and cached land/water variants cannot contaminate each other. Encounter behavior, collisions, multiplayer authority and native sprite defaults are unchanged.
