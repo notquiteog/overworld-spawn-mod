@@ -115,7 +115,10 @@ return function(mod,S,Actors,busy)
   if not mod.options:get('overworld_catching')or not names[ball]or wire.ambient or wire.scenery or wire.hiddenEncounter or wire.visibleSprite==false then return false,{message='INVALID CATCH'}end
   local Safari=require('src.core.game3.safari')
   if Safari.isActive and Safari.isActive(g.session)then return false,{message='USE SAFARI BATTLE'}end
-  if #g.session.party>=6 and not Storage.findOpenSlot(Storage.ensure(g.session))then return false,{message='PARTY AND PC FULL'}end
+  if #g.session.party>=6 and not Storage.findOpenSlot(Storage.ensure(g.session))then
+   C.message='PARTY AND PC FULL';C.cooldown=.5
+   return false,{message=C.message}
+  end
   if count(g,ball)<=0 or not Bag.remove(g.session.bag,ball,1)then return false,{message='NO POKE BALLS'}end
   local caught,message,shakes=C.resolve(g,wire,ball)
   C.ball=ball;C.message=message;C.cooldown=.5

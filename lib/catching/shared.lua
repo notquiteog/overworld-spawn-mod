@@ -123,7 +123,10 @@ function C.begin(catcher,game,ow,row,map,action)
       or catcher.projectile:isBusy() or not C.canCatch(catcher.logic,game,ow,{x=x,y=y,facing=facing},row,action) then
     return false,{message='FIELD UNAVAILABLE'}
   end
-  if not C.hasStorage(game) then return false,{message='PARTY AND PC FULL'} end
+  if not C.hasStorage(game) then
+    catcher.hud:showFeedback('PARTY AND PC FULL',1.5)
+    return false,{message='PARTY AND PC FULL'}
+  end
   local rate,def=GameCompat.catchRate(game,row.species)
   local quality=CatchMath.throwQuality(p.power,math.abs(row.x-x)+math.abs(row.y-y))
   if not def or quality==CatchMath.QUALITY.MISS then return false,{message='TARGET MOVED'} end

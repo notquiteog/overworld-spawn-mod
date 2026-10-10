@@ -78,6 +78,13 @@ for generation=1,2 do
   local count=boxes.NUM_BOXES or boxes.COUNT
   game.save.boxes={};for i=1,count do game.save.boxes[i]={};for k=1,20 do game.save.boxes[i][k]={}end end
   request();eq(catcher.sharedPending,nil,'full party and PC reject before request');eq(game.save.inventory.MASTER_BALL,8,'full storage keeps ball')
+  local last=table.remove(game.save.boxes[count]);action=request()
+  game.save.boxes[count][#game.save.boxes[count]+1]=last
+  catcher.hud.message=nil
+  accepted,result=C.begin(catcher,game,ow,wire,ow.map.id,action)
+  eq(accepted,false,'storage filled after request rejects grant')
+  eq(catcher.hud.message,'PARTY AND PC FULL','rejected grant reports native feedback')
+  eq(game.save.inventory.MASTER_BALL,8,'rejected grant keeps ball')
   table.remove(game.save.boxes[count]);action=request()
   accepted,result=C.begin(catcher,game,ow,wire,ow.map.id,action)
   eq(result.caught,true,'native overflow storage succeeds');eq(#game.save.boxes[count],20,'last available box receives mon')

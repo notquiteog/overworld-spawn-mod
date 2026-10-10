@@ -86,6 +86,11 @@ local accepted,result=mod.exports.sharedSpawns.beginCatch({species=16,level=4,te
 eq(accepted,true,'host grant accepts catch');eq(result.caught,true,'grant uses native capture');eq(game.session.bag[4],beforeBall-1,'grant consumes once');eq(S.spawns[row.id],row,'provider leaves authoritative removal to host')
 eq(game.session.party[#game.session.party].personality,4294967295,'capture preserves supplied uint32 PID')
 eq(game.session.party[#game.session.party].isShiny,true,'capture preserves supplied native shiny override')
+local savedParty=game.session.party;game.session.party={{},{},{},{},{},{}}
+local storage=modules['src.core.game3.storage'];local slot=storage.findOpenSlot;storage.findOpenSlot=function()end
+accepted,result=mod.exports.sharedSpawns.beginCatch({species=16,level=4},Map.current,{ballId=4})
+eq(accepted,false,'full storage rejects shared grant');eq(C.message,'PARTY AND PC FULL','native rejection feedback shown')
+storage.findOpenSlot=slot;game.session.party=savedParty
 eq(mod.exports.sharedSpawns.canCatch({x=15,y=15,facing='right'},{x=16,y=15},{charge=0},Map.current),true,'host verifies local clear ray')
 eq(mod.exports.sharedSpawns.canCatch({x=15,y=15,facing='left'},{x=16,y=15},{charge=0},Map.current),false,'host rejects wrong facing')
 eq(mod.exports.sharedSpawns.canCatch({x=15,y=15,facing='right'},{x=16,y=15},{charge=0},'UNKNOWN_MAP'),false,'host rejects unavailable remote map')
