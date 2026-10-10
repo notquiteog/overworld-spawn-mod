@@ -193,11 +193,19 @@ return function(mod,S,Actors,busy)
   -- Gen 3 keeps game.phase='field' while its native battle/trade UI owns the
   -- frame. The overworld ball selector must not paint over those screens.
   if Battle.isActive()or Runtime.uiBusy()then return end
-  local scale=(viewport.scale or 1)*(.35+size*.08)
-  love.graphics.push('all');love.graphics.translate((viewport.gameX or 0)+6,(viewport.gameY or 0)+(viewport.gameHeight or viewport.height or 160)-30*scale)
-  love.graphics.scale(scale,scale);love.graphics.setColor(0,0,0,.75);love.graphics.rectangle('fill',0,0,235,28)
-  love.graphics.setColor(1,1,1,1);love.graphics.print((names[C.ball]or'POKE')..' BALL x'..count(game,C.ball)..'  '..string.upper(mod.options:get('catch_throw_key')or'c')..' / '..string.upper(mod.options:get('catch_cycle_key')or'q'),4,2)
-  love.graphics.print(C.charge>0 and('RANGE '..(2+math.floor(C.charge*4)))or C.message,4,14);love.graphics.pop()
+  local Font=require('src.ui.game3.font')
+  local Window=require('src.ui.game3.window')
+  local scale=math.max(1,math.floor((viewport.scale or 1)*(.35+size*.08)+.5))
+  local fit=math.max(1,math.floor(((viewport.gameWidth or viewport.width or 240)-8)/232))
+  scale=math.min(scale,fit)
+  local gfx=love.graphics
+  gfx.push('all');gfx.origin();gfx.setShader()
+  gfx.translate(math.floor((viewport.gameX or 0)+4),math.floor((viewport.gameY or 0)+(viewport.gameHeight or viewport.height or 160)-48*scale))
+  gfx.scale(scale,scale);gfx.setColor(1,1,1,1)
+  local box=Window.template(1,1,27,4);Window.fill(box);Window.stdFrame(box)
+  Font.draw((names[C.ball]or'POKE')..' BALL x'..count(game,C.ball)..'  '..string.upper(mod.options:get('catch_throw_key')or'c')..' / '..string.upper(mod.options:get('catch_cycle_key')or'q'),8,8,{maxWidth=216,colors=Font.COLOR.NORMAL})
+  Font.draw(C.charge>0 and('RANGE '..(2+math.floor(C.charge*4)))or C.message,8,24,{maxWidth=216,colors=Font.COLOR.NORMAL})
+  gfx.pop()
  end)
  return C
 end

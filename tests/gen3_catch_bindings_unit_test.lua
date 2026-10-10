@@ -52,9 +52,13 @@ reset(3);local requests=0;S.shared={catching=true,request=function(_,_,req)reque
 pressed.throw_ball=true;tick();pressed.throw_ball=false;tick();eq(requests,1,'one host reservation');eq(game.session.bag[3],3,'no ball consumed before host grant')
 reset(2);S.shared=nil;S.spawns={};pressed.throw_ball=true;tick();pressed.throw_ball=false;tick();eq(game.session.bag[2],2,'empty-field throw uses selected ball');eq(C.projectile.resolved,true,'miss cannot capture or despawn');eq(C.projectile.row.px,48,'tap miss lands two cells ahead')
 local painted=0
-for _,k in ipairs({'translate','scale','print'})do love.graphics[k]=function()painted=painted+1 end end
+for _,k in ipairs({'origin','setShader','translate','scale','print'})do love.graphics[k]=function()painted=painted+1 end end
+local nativeFrames,nativeText=0,0
+package.loaded['src.ui.game3.window']={template=function(...)return{...}end,fill=function()end,stdFrame=function()nativeFrames=nativeFrames+1 end}
+package.loaded['src.ui.game3.font']={COLOR={NORMAL={}},draw=function()nativeText=nativeText+1 end}
 options.catch_hud_size=5
 battling=true;hooks['render.hud'](function()end,game,{});eq(painted,0,'no field selector over native battle with field phase')
 battling=false;menuOpen=true;hooks['render.hud'](function()end,game,{});eq(painted,0,'no selector over native trade/menu')
 menuOpen=false;hooks['render.hud'](function()end,game,{});eq(painted>0,true,'selector returns to the playable field')
+eq(nativeFrames,1,'field uses native frame');eq(nativeText,2,'field uses native font')
 print('PASS native catch bindings ('..n..' assertions)')
