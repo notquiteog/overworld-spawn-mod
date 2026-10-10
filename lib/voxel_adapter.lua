@@ -319,6 +319,23 @@ function VoxelAdapter:updateEntity(entity)
 
   entity.worldRenderer = VoxelAdapter.WORLD_RENDERER
 
+  -- Spawn/hide choreography deliberately returns a nil body pose. It is not
+  -- an asset failure and must not activate an emergency overlay (or probe and
+  -- log that same expected nil every frame). FX still use their own draw path.
+  if entity.render and entity.render.isBodyVisible
+     and not entity.render:isBodyVisible(entity) then
+    entity.pokemonRenderer = "HIDDEN"
+    entity.worldBillboardReady = false
+    entity.voxelRegistered = true
+    entity.voxelUpdateOk = true
+    entity.voxelDisabled = false
+    entity.render2DFallback = false
+    entity.dramaticBillboardSkipped = false
+    entity.depthIntegration, entity.objectOcclusion = "N/A", "N/A"
+    entity.grassRenderer = "N/A"
+    return true
+  end
+
   -- Bind / refresh native SpriteRenderer for DS SpriteBillboards.
   if entity.render and entity.render.bindWorldBillboard then
     local okBind, why = pcall(entity.render.bindWorldBillboard,
