@@ -290,6 +290,28 @@ local function placeWild(opts)
   return entity, record
 end
 
+-- Storage rejection must never remove a caught actor or register ownership.
+do
+  local compat = V.require("game_compat")
+  local store, mark = compat.giveCaughtPokemon, compat.markSpeciesCaught
+  local stamps = 0
+  compat.markSpeciesCaught = function() stamps = stamps + 1 end
+  for _, rejected in ipairs({ { destination = "box", boxFull = true }, {} }) do
+    local e = placeWild({ id = "storage_rejected", x = 8, y = 5 })
+    catching:_lockTarget(e)
+    catching.activeCapture = { entity=e, species=e.species, level=5 }
+    compat.giveCaughtPokemon = function() return rejected end
+    catching:_resolveCapture(game, ow, true)
+    eq(logic.entities[e.id], e, "storage rejection keeps real wild")
+    check(e.visibleSprite and not e.wildsCatchLocked, "storage rejection restores visible unlocked actor")
+    eq(catching.activeCapture, nil, "storage rejection clears pending capture")
+    eq(catching.phase, "idle", "storage rejection returns input")
+  end
+  eq(stamps, 0, "storage rejection does not mark dex owned")
+  compat.giveCaughtPokemon, compat.markSpeciesCaught = store, mark
+  logic.entities.storage_rejected=nil;logic.spawns.storage_rejected=nil
+end
+
 -- ---- Inventory consume ----
 eq(catching:ballCount(game, "POKE_BALL"), 5, "start with 5 Poké Balls")
 eq(catching:getSelectedBall(game), "POKE_BALL", "selected Poké Ball")

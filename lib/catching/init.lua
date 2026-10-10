@@ -971,6 +971,17 @@ function OverworldCatching:_resolveCapture(game, ow, caught)
         species = species,
         entity = entity,
       }) or {}
+      -- A full PC (or unavailable storage adapter) did not acquire this mon.
+      -- Preserve the world actor and dex rather than announcing a lost catch.
+      if not result.destination or result.boxFull then
+        self:_unlockTarget(entity)
+        self.activeCapture = nil
+        self.phase = "idle"
+        pushText(game, self.mod, result.boxFull
+          and "There's no room\nfor more POKéMON!"
+          or "Couldn't store this\nPOKéMON.")
+        return
+      end
       local dexOk = GameCompat.markSpeciesCaught(game, species, newMon)
       self:_goldCatchLog("destination=%s", tostring(result.destination or "none"))
       self:_goldCatchLog("dex updated=%s", tostring(dexOk == true))
