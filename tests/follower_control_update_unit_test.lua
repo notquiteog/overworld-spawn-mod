@@ -750,6 +750,28 @@ do
   eq(r.controlDelta, 1, "G: surf exception still runs ControlEngine:update")
 end
 
+-- Suspending followers must retain a later mount/update owner and not double tick.
+do
+  local before = OverworldState.update
+  local engine = makeEngine(1)
+  local ticks, external = 0, 0
+  engine.update = function() ticks = ticks + 1 end
+  assert(engine:_installOverworldUpdateWrap())
+  local inner = OverworldState.update
+  local outer = function(self,dt) external=external+1;return inner(self,dt) end
+  OverworldState.update = outer
+  engine:_restoreOverworldUpdateWrap()
+  eq(OverworldState.update, outer, "suspension retains newer mount update")
+  OverworldState:update(1/60)
+  eq(external,1,"newer mount still advances")
+  eq(ticks,0,"buried suspended follower wrapper is inert")
+  assert(engine:_installOverworldUpdateWrap())
+  OverworldState:update(1/60)
+  eq(external,2,"reinstall retains mount owner")
+  eq(ticks,1,"reinstall ticks follower exactly once")
+  engine:_restoreOverworldUpdateWrap();OverworldState.update=before
+end
+
 -- CASE F — Gold keeps World:step ownership; Gen1 OW wrap is not installed
 do
   local prevGV = package.loaded["src.core.GameVersion"]

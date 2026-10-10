@@ -4346,14 +4346,18 @@ function ControlEngine:_installOverworldUpdateWrap()
   if not (OverworldState and type(OverworldState.update) == "function") then
     return false
   end
-  if OverworldState._wildsControlEngineUpdateWrap == OverworldState.update then
+  if OverworldState._wildsControlEngineUpdateWrap == OverworldState.update
+      and self._owUpdateToken and self._owUpdateToken.active then
     self._owUpdateWrapped = true
     return true
   end
   local engine = self
   local origUpdate = OverworldState.update
+  local token = { active = true }
+  self._owUpdateToken = token
   local function owUpdateWrap(owSelf, dt, ...)
     local a, b, c, d, e = origUpdate(owSelf, dt, ...)
+    if not token.active then return a, b, c, d, e end
     engine.diag.overworldUpdateCalls = (engine.diag.overworldUpdateCalls or 0) + 1
     -- After vanilla: player.targetX/Y for this logic frame are committed,
     -- and stock npc:update has already run (trailer.update is a no-op).
@@ -4412,10 +4416,11 @@ end
 function ControlEngine:_restoreOverworldUpdateWrap()
   local OverworldState = tryRequire("src.world.OverworldController")
   if not OverworldState then return end
-  -- Unconditionally restore to the vanilla original captured at first install.
-  -- External mods (e.g. Followers EX) may have wrapped on top, so equality
-  -- guards against _wildsControlEngineUpdateWrap would fail.
-  if self._owOrigUpdate then
+  -- A mount can suspend followers after wrapping our update. Never remove
+  -- that newer owner's chain. Buried wrappers become inert passthroughs.
+  if self._owUpdateToken then self._owUpdateToken.active = false end
+  self._owUpdateToken = nil
+  if self._owOrigUpdate and OverworldState.update == OverworldState._wildsControlEngineUpdateWrap then
     OverworldState.update = self._owOrigUpdate
     OverworldState._wildsControlEngineUpdateWrap = nil
   end
