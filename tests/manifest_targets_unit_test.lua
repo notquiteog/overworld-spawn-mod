@@ -1,7 +1,7 @@
 -- Manifest target semantics vs current Gen1Recomp ModTargets.
 -- Does not duplicate engine logic: when a Gen1Recomp tree is present it
 -- requires src.mods.ModTargets and checks labels against the production
--- Wilds manifest (`games`: gen1+gen2 → "Gen 1+2").
+-- Wilds manifest (`games`: gen1+gen2+gen3 → "Gen 1+2+3").
 --
 -- Run: lua tests/manifest_targets_unit_test.lua
 -- Optional: GEN1RECOMP_ROOT=/path/to/gen1recomp
@@ -47,6 +47,7 @@ do
   check(raw:find('"games"', 1, true) ~= nil, "games key present")
   check(raw:find('"gen1"', 1, true) ~= nil, "games includes gen1")
   check(raw:find('"gen2"', 1, true) ~= nil, "games includes gen2")
+  check(raw:find('"gen3"', 1, true) ~= nil, "games includes gen3")
   check(not raw:find("gen2compat", 1, true),
         "no gen2compat (legacy flag; games is the precise field)")
   check(raw:find('"api": 2', 1, true) ~= nil or raw:find('"api":2', 1, true) ~= nil,
@@ -70,9 +71,10 @@ else
 
   eq(table.concat(ModTargets.expand("gen1"), ","), "red,blue,yellow",
      "gen1 expands to red,blue,yellow")
-  -- Engine ORDER: gold then silver (GameVersion.ORDER / generationVersions).
-  eq(table.concat(ModTargets.expand("gen2"), ","), "gold,silver",
-     "gen2 expands to gold,silver (current engine)")
+  -- Engine ORDER: gold then silver then crystal
+  -- (GameVersion.ORDER / generationVersions).
+  eq(table.concat(ModTargets.expand("gen2"), ","), "gold,silver,crystal",
+     "gen2 expands to gold,silver,crystal (current engine)")
   eq(table.concat(ModTargets.expand("silver"), ","), "silver",
      "silver is a recognized Gen2 game target")
 
@@ -89,8 +91,8 @@ else
      'games: ["gen1", "gen2"] → Gen 1+2')
 
   local all = { games = ModTargets.normalize({ "all" }) }
-  eq(ModTargets.label(all), "Gen 1+2",
-     'games: ["all"] → Gen 1+2')
+  eq(ModTargets.label(all), "Gen 1+2+3",
+     'games: ["all"] → Gen 1+2+3')
 
   local gen2 = { games = ModTargets.normalize({ "gen2" }) }
   eq(ModTargets.label(gen2), "Gen 2",
@@ -116,17 +118,24 @@ else
   eq(GameVersion.VERSIONS.silver.cachePrefix, "silver/",
      "engine silver has cache prefix silver/")
 
-  local prodGames = ModTargets.normalize({ "gen1", "gen2" })
+  local prodGames = ModTargets.normalize({ "gen1", "gen2", "gen3" })
   local prod = { games = prodGames }
-  eq(table.concat(prodGames, ","), "red,blue,yellow,gold,silver",
-     "production normalize(gen1,gen2) → red,blue,yellow,gold,silver")
-  eq(ModTargets.label(prod), "Gen 1+2", "production games label Gen 1+2")
-  eq(ModTargets.chip(prod), "GEN 1+2", "production games chip GEN 1+2")
+  eq(table.concat(prodGames, ","),
+     "red,blue,yellow,gold,silver,crystal,firered,leafgreen,ruby,sapphire,emerald",
+     "production normalize(gen1,gen2,gen3) → red,blue,yellow,gold,silver,crystal,firered,leafgreen,ruby,sapphire,emerald")
+  eq(ModTargets.label(prod), "Gen 1+2+3", "production games label Gen 1+2+3")
+  eq(ModTargets.chip(prod), "GEN 1+2+3", "production games chip GEN 1+2+3")
   eq(ModTargets.supports(prod, "red"), true, "production supports red")
   eq(ModTargets.supports(prod, "blue"), true, "production supports blue")
   eq(ModTargets.supports(prod, "yellow"), true, "production supports yellow")
   eq(ModTargets.supports(prod, "gold"), true, "production supports gold")
   eq(ModTargets.supports(prod, "silver"), true, "production supports silver")
+  eq(ModTargets.supports(prod, "crystal"), true, "production supports crystal")
+  eq(ModTargets.supports(prod, "firered"), true, "production supports firered")
+  eq(ModTargets.supports(prod, "leafgreen"), true, "production supports leafgreen")
+  eq(ModTargets.supports(prod, "ruby"), true, "production supports ruby")
+  eq(ModTargets.supports(prod, "sapphire"), true, "production supports sapphire")
+  eq(ModTargets.supports(prod, "emerald"), true, "production supports emerald")
 
   print("ok  ModTargets sourced from " .. root)
 end

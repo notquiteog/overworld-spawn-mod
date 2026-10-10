@@ -98,6 +98,9 @@ local function makeMap()
     isWalkableCell = function(_, x, y)
       return y >= 10 and x >= 0 and x < 40
     end,
+    cellTile = function(_, x, y)
+      return y < 10 and "WATER" or "GRASS"
+    end,
     isWaterCell = function(_, x, y)
       return y < 10 and x >= 0 and x < 40
     end,
