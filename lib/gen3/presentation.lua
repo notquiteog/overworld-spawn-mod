@@ -63,7 +63,11 @@ return function(mod,Actors)
  function P.apply(row,game)
   local gid=P.sprite(row.species,row.terrain,row.shiny);if not gid then return end
   local waterMode=mod.options:get('water_spawns')
-  local hidden=row.behavior=='hidden' or row.terrain=='water' and waterMode=='hidden_silhouettes'
+  -- Hidden encounter behavior is land/cave camouflage, never a request to
+  -- replace a swimmer with an oval. Only the explicit water display option
+  -- may select that marker (including rows received from an older host).
+  local hidden=row.terrain~='water'and row.behavior=='hidden'
+    or row.terrain=='water'and waterMode=='hidden_silhouettes'
   local mask=mod.options:get('wild_silhouettes')
   local silhouette=not row.ambient and (mask=='all' or mask=='undiscovered'and not Dex.isCaught(game.session and game.session.dex,row.species))
   silhouette=silhouette or row.terrain=='water'and waterMode=='silhouettes'

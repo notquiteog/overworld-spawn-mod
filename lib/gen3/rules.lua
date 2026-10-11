@@ -13,10 +13,10 @@ function R.randomAllowed(get,terrain)
  end
  return get('random_encounters')~=false
 end
-function R.behavior(get,rng)
+function R.behavior(get,rng,terrain)
  local pool={}
- for _,name in ipairs({'idle','wander','aggressive','hidden'})do if get('enable_'..name)then pool[#pool+1]=name end end
+ for _,name in ipairs({'idle','wander','aggressive','hidden'})do if get('enable_'..name)and not(terrain=='water'and name=='hidden')then pool[#pool+1]=name end end
  return #pool>0 and pool[rng(#pool)]or'idle'
 end
-function R.behaviorEnabled(get,name)return get('enable_'..(name or'idle'))~=false end
+function R.behaviorEnabled(get,name,terrain)return not(terrain=='water'and name=='hidden')and get('enable_'..(name or'idle'))~=false end
 return R

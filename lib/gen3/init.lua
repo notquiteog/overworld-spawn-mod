@@ -45,7 +45,7 @@ return function(mod)
   local species=tonumber(entry and (entry.species or entry[1]));if not species or not Pokemon.name(species)then return nil end
   local lo=math.max(1,tonumber(entry.minLevel or entry.level or entry[2])or 1)
   local hi=math.min(100,tonumber(entry.maxLevel or entry.level or entry[2])or lo)
-  return Identity.assign({species=species,level=love.math.random(lo,math.max(lo,hi)),behavior=Rules.behavior(get,love.math.random)})
+  return Identity.assign({species=species,level=love.math.random(lo,math.max(lo,hi)),behavior=Rules.behavior(get,love.math.random,terrain)})
  end
  function S.remove(row)S.spawns[row.id]=nil;Actors.rows[row.id]=nil end
  function S.spawn(species,level,x,y,terrain,opts)
@@ -56,7 +56,8 @@ return function(mod)
   row.networkId=(S.shared and S.shared.session or 'offline')..':'..Map.current..':'..S.nextId
   row.personality=identity.personality;row.shiny=identity.shiny
   row.species=species;row.level=level;row.terrain=terrain or Encounter.terrainAt(x,y);row.nextMove=1+love.math.random()*2
-  row.behavior=opts and opts.behavior or Rules.behavior(get,love.math.random)
+  row.behavior=opts and opts.behavior or Rules.behavior(get,love.math.random,row.terrain)
+  if row.terrain=='water'and row.behavior=='hidden'then row.behavior='idle'end
   row.ambient=opts and opts.ambient;row.scenery=opts and opts.scenery
   S.spawns[row.id]=row;return row
  end
@@ -267,7 +268,7 @@ return function(mod)
   row.nextMove=(row.nextMove or 1)-dt;if row.nextMove>0 then return end
   row.nextMove=1+love.math.random()*2
   local behavior=row.behavior or'idle'
-  if not row.ambient and not Rules.behaviorEnabled(get,behavior)then behavior=Rules.behavior(get,love.math.random);row.behavior=behavior end
+  if not row.ambient and not Rules.behaviorEnabled(get,behavior,row.terrain)then behavior=Rules.behavior(get,love.math.random,row.terrain);row.behavior=behavior end
   if behavior=='hidden'then return end
   local d=dirs[love.math.random(4)]
   if behavior=='idle'then if get('enable_idle')then row.facing=d[3]end;return end

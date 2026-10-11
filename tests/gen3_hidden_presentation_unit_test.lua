@@ -17,7 +17,7 @@ function g.newShader()return{}end
 local A={base=810000,sprites={[1]={width=16,height=16,image={},quads={},groundPadding=0}}}
 function A.front()return 1 end
 function A.sprite(id,image,w,h)A.sprites[id]={image=image,width=w,height=h}end
-local mod={options={get=function(_,key)return options[key]end},read=function(_,path)assert(path=='assets/pmdcollab/sprite_table.lua');return'return {}'end}
+local mod={options={get=function(_,key)return options[key]end},read=function(_,path)if path=='assets/pmdcollab/sprite_table.lua'then return'return {}'end end}
 local P=assert(loadfile('lib/gen3/presentation.lua'))()(mod,A)
 local function apply(terrain,behavior)
  local row={species=19,terrain=terrain,behavior=behavior,cellX=1,cellY=1}
@@ -26,8 +26,13 @@ end
 local land,l=apply('land','hidden')
 assert(l.ellipses==0 and l.draws==0,'hidden land must be transparent')
 local water,w=apply('water','hidden')
-assert(w.ellipses==9 and w.draws==0,'underwater marker retained across every frame')
+assert(w.ellipses==0 and w.draws==9,'random hidden behavior must not override water display mode')
 assert(land.graphicsId~=water.graphicsId,'land and water masks must never share cache entries')
+options.water_spawns='swimming_sprites'
+local swim,sw=apply('water','hidden');assert(sw.ellipses==0 and sw.draws==9,'normal swimmers never become blobs')
+options.water_spawns='hidden_silhouettes'
+local marker,m=apply('water','idle');assert(m.ellipses==9 and m.draws==0,'explicit hidden water mode retains marker')
+options.water_spawns='silhouettes'
 local cave,c=apply('cave','hidden');assert(c.ellipses==0 and c.draws==0,'no underwater marker in caves')
 local visible,v=apply('land','idle');assert(v.draws==9 and v.ellipses==0,'visible land art retained')
 local again,a=apply('land','hidden');assert(again.graphicsId==land.graphicsId and a.ellipses==0,'water variant cannot contaminate cached grass')
