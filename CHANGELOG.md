@@ -1,3 +1,7 @@
+## 2.6.1 — 2026-10-11
+
+Prevent randomly chosen hidden behavior from replacing swimming Pokémon with blob silhouettes. Preserve the native Dive sprite and suspend terrestrial followers underwater. Explicit Hidden Silhouettes remains an available setting.
+
 ## 2.6.0 — 2026-10-10 — Gen3 native-art overworlds and full-storage feedback
 
 Native Gen3 overworlds now use Hoenn residents instead of substitute art, and the Gen3 catching HUD renders with native window frames and crisp fonts. New installs and the test picker accept only real species sprites, and emergency overlays never resurrect intentionally hidden spawn bodies. Options rows were rebalanced so long Ruby/Sapphire labels stay clear of the native value columns while cartridge rows are preserved.
