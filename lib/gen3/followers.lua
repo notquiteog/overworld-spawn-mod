@@ -23,7 +23,7 @@ return function(mod,Actors,Presentation,busy)
   for _,mon in ipairs(party)do if(mon.hp or 0)>0 and not egg(mon) then return mon end end
  end
  function F.controlled(game)
-  return mod.options:get('follow_control')=='pokemon' and not mounted()and not Player.surfing and F.leader(game)
+  return mod.options:get('follow_control')=='pokemon' and not mounted()and not Player.surfing and not Player.underwater and F.leader(game)
  end
  Sprites.playerGraphicsId=function(game)
   local mon=F.controlled(game)
@@ -38,6 +38,9 @@ return function(mod,Actors,Presentation,busy)
    and not Collision.warpAt(c.x,c.y)and not Objects.blocks(c.x,c.y)
  end
  function F.update(game,dt)
+  -- Dive owns its composite swimmer sprite. Underwater paths are not land
+  -- trails and must not be replayed by followers after surfacing.
+  if Player.underwater then F.reset();return end
   local at={x=Player.cellX,y=Player.cellY}
   local last=F.last
   if last and(last.x~=at.x or last.y~=at.y)then
