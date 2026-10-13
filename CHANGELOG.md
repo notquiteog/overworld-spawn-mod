@@ -1,3 +1,7 @@
+## 2.6.2 — 2026-10-13
+
+Ground all follower styles using visible sprite footing, preserve intentional water anchors and authored animation bob, and refresh geometry-only sprite definition changes. Gen3 native sprites now use the same transparent-padding grounding as the voxel view. Focused sprite-footing, surface/runtime/underwater follower and cross-generation grounding tests pass; Crystal native and voxel captures inspected on Gen1Recomp 0.3.85.
+
 ## 2.6.1 — 2026-10-11
 
 Prevent randomly chosen hidden behavior from replacing swimming Pokémon with blob silhouettes. Preserve the native Dive sprite and suspend terrestrial followers underwater. Explicit Hidden Silhouettes remains an available setting.
