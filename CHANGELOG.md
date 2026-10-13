@@ -1,3 +1,11 @@
+## 2.6.3 — 2026-10-13
+
+- Preserve follower identity and recorded paths across native connected-map boundaries.
+- Match native running cadence, continue catching up after the player stops, and remove ordinary teleport catch-up.
+- Reset cadence across locomotion changes and ignore stale bicycle speed after dismounting. Align exported version with the manifest.
+
+Verified on Gen1Recomp 0.3.85: Yellow, Crystal and Emerald connection fixtures preserve followers. A sustained Emerald run crossed Oldale to Route 103 at a bounded 120 px/s follower pace, then caught up 16 px after stopping. Focused regressions cover movement, surface changes and bike-to-foot cadence. This is not exhaustive coverage of every route or companion combination.
+
 ## Unreleased
 
 Preserve follower actors and trails across native connected-map crossings. Resolve Crystal neighbor collision using the engine map IDs. Followers reuse native running cadence when lagging and finish catching up after the player stops; Gen3 followers follow recorded corners without distance-triggered teleportation. Door/warp reset and underwater suppression remain intact. See `docs/FOLLOWER_CONNECTION_QA.md` for exact verification scope.
