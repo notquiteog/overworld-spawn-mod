@@ -28,6 +28,17 @@ F.last={x=2,y=11};F.trail={{x=2,y=14,seq=1},{x=2,y=13,seq=2},{x=2,y=12,seq=3}}
 row.px,row.py=32,240;row.trailSeq=1
 for i=1,80 do local x,y=row.px,row.py;F.update(game,1/60);assert(math.abs(row.px-x)+math.abs(row.py-y)<=2.001,'catch-up teleported')end
 assert(row.py==192,'stopped player prevented catch-up')
+-- A faster bicycle step must not survive dismount into foot catch-up.
+P.biking=true;P.moving=true;P.stepFrames=4;F.update(game,1/60)
+assert(F.runSpeed==240,'bike pace was not observed')
+P.biking=false;P.moving=false;P.stepFrames=16
+row.py=240;row.trailSeq=1
+local y=row.py;F.update(game,1/60)
+assert(F.runSpeed==nil and y-row.py<=1.001,'dismount inherited bike catch-up speed')
+P.moving=true;P.stepFrames=8;F.update(game,1/60)
+P.moving=false;P.stepFrames=16;row.py=240;row.trailSeq=1
+local y=row.py;F.update(game,1/60)
+assert(F.runSpeed==120 and math.abs(y-row.py-2)<.001,'idle foot lost native running catch-up')
 events['map.exited']();events['map.entered']{via='warp',mapId='ROOM',map={width=5,height=5}}
 F.mapChanged(game);assert(next(F.rows)==nil and #F.trail==0,'warp retained old world trail')
 print('PASS Gen3 connected identity, offset history, native run speed, idle catch-up and warp reset')

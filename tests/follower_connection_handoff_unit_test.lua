@@ -839,6 +839,32 @@ do
  check(e:_chainCatchUpSteps(game,world)>0,"idle trainer lets follower finish existing trail")
 end
 
+-- Bicycle pace cannot leak into stopped/walking foot catch-up.
+do
+ local e=makeEngine();local g={save={}};local world={player={moving=true}}
+ e:_observeTrailCadence(g,world,8,"land")
+ eq(world._wildsRunStepFrames,8,"foot run cadence remembered")
+ world.player.moving=false;e:_observeTrailCadence(g,world,16,"land")
+ eq(world._wildsRunStepFrames,8,"idle foot preserves previous run cadence")
+ g.save.onBike=true;world.player.moving=true;e:_observeTrailCadence(g,world,4,"land")
+ eq(world._wildsRunStepFrames,4,"bike has its own observed cadence")
+ g.save.onBike=false;world.player.moving=false;e:_observeTrailCadence(g,world,16,"land")
+ check(world._wildsRunStepFrames==nil,"stationary dismount discards bicycle cadence")
+ world.player.moving=true;e:_observeTrailCadence(g,world,16,"land")
+ eq(world._wildsRunStepFrames,16,"walking after dismount does not inherit bike speed")
+ e:_observeTrailCadence(g,world,8,"land");world.player.moving=false
+ e:_observeTrailCadence(g,world,16,"land")
+ eq(world._wildsRunStepFrames,8,"new foot running remains available while idle")
+ world.player.onBike=true;e:_observeTrailCadence(g,world,4,"land")
+ check(world._wildsRunStepFrames==nil,"player bike flag also changes locomotion while idle")
+ world.player.onBike=false;e:_observeTrailCadence(g,world,16,"water")
+ check(world._wildsRunStepFrames==nil,"surface change clears prior cadence")
+ world.playerState="bike";world.player.moving=true;e:_observeTrailCadence(g,world,4,"land")
+ eq(world._wildsRunStepFrames,4,"Gen2 native World mode records bicycle pace")
+ world.playerState="normal";world.player.moving=false;e:_observeTrailCadence(g,world,16,"land")
+ check(world._wildsRunStepFrames==nil,"Gen2 native dismount discards bicycle cadence")
+end
+
 if failures > 0 then
   io.stderr:write(string.format("\n%d failure(s)\n", failures))
   os.exit(1)

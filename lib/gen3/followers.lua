@@ -31,7 +31,7 @@ return function(mod,Actors,Presentation,busy)
  end
  function F.reset()
   for id in pairs(F.rows)do Actors.rows[id]=nil end
-  F.rows={};F.trail={};F.last=nil;F.sequence=0;F.runSpeed=nil
+  F.rows={};F.trail={};F.last=nil;F.sequence=0;F.runSpeed=nil;F.runLocomotion=nil
  end
  -- The engine event identifies genuine walking connections. Coordinate
  -- transforms come from its public connection API, never from a guessed
@@ -84,6 +84,8 @@ return function(mod,Actors,Presentation,busy)
   F.last=at
   while #F.trail>256 do table.remove(F.trail,1)end
   local speed=960/math.max(1,tonumber(Player.stepFrames)or 16)
+  local locomotion=mounted()and'mounted'or Player.biking and'bike'or Player.surfing and'water'or'foot'
+  if F.runLocomotion~=locomotion then F.runSpeed=nil;F.runLocomotion=locomotion end
   if Player.moving and not Player.jumping then F.runSpeed=math.max(F.runSpeed or speed,speed)end
   local desired={};local controlled=F.controlled(game)
   local rideMod=mod.find and mod.find('DRAMATIC_SKY_RIDE');local ride=rideMod and rideMod.exports

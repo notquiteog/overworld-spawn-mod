@@ -28,3 +28,17 @@ and `emerald-stop/{run.log,stopped.png,caught-up.png}`. This exercises the nativ
 movement API, not physical held-controller input. One Emerald seam only; Crystal
 was not rerun in this bounded follow-up. No production edits, player saves or
 release changes; isolated runtime closed.
+
+## Cadence review: bicycle to foot
+
+The fastest observed cadence previously survived locomotion changes. Gen1/2 now
+clear it when native World.playerState (Gen2), bicycle state (Gen1), or surface
+changes; Gen3 clears it between foot, bike, water and mounted modes. Walking or
+standing within foot mode preserves the observed foot-running cadence. The first
+foot frame after dismount cannot use the former cached bicycle speed.
+
+Focused regressions cover Gen1 save/player bicycle flags, Gen2 World bike→normal,
+Gen3 240px/s bike→stationary foot (at most60px/s), and subsequent120px/s foot run
+retained while idle. Seven targeted suites pass: connection handoff, Gen3 speed,
+trail spacing, water movement, Gen3 underwater, Gen2 runtime and sync no-op.
+This follow-up is code/unit verification; no additional runtime was requested.

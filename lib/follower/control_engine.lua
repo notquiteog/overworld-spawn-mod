@@ -2697,6 +2697,23 @@ local function trailerSwapIntended(npc, owner, trailers, goals, ow)
   return ogx == nx and ogy == ny
 end
 
+-- Remember running only within the current locomotion mode. A fast bicycle
+-- cadence must not become the foot follower's permanent catch-up speed.
+function ControlEngine:_observeTrailCadence(game, ow, stepClock, surface)
+  local p = ow.player
+  local bike = p.onBike or (game and game.save and game.save.onBike)
+  -- Gold/Silver/Crystal keep their native mode on World.playerState rather
+  -- than the Gen1 save/player onBike fields (also covers their special modes).
+  local locomotion = ow.playerState or (bike and "bike" or surface)
+  if ow._wildsRunLocomotion ~= locomotion then
+    ow._wildsRunStepFrames = nil
+    ow._wildsRunLocomotion = locomotion
+  end
+  if p.moving and not p.hopStep and not p.jumping then
+    ow._wildsRunStepFrames = math.min(ow._wildsRunStepFrames or stepClock, stepClock)
+  end
+end
+
 function ControlEngine:syncTrailers(game, ow, opts)
   opts = opts or {}
   -- "no_context" tells update() the world wasn't ready (a transitional
@@ -2799,9 +2816,7 @@ function ControlEngine:syncTrailers(game, ow, opts)
   local mapEnter = opts.mapEnter == true
   local stepClock = p.stepFramesCur or p.stepFrames
     or (anchor and (anchor.stepFramesCur or anchor.stepFrames)) or 16
-  if p.moving and not p.hopStep and not p.jumping then
-    ow._wildsRunStepFrames = math.min(ow._wildsRunStepFrames or stepClock, stepClock)
-  end
+  self:_observeTrailCadence(game, ow, stepClock, surface)
 
   -- Surface transition: reseed once so trail goals leave the frozen shore cell.
   -- Sprite presentation is rebound after composition (existing NPCs keep
