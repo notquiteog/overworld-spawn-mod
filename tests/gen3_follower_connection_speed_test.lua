@@ -31,10 +31,12 @@ assert(row.py==192,'stopped player prevented catch-up')
 -- A faster bicycle step must not survive dismount into foot catch-up.
 P.biking=true;P.moving=true;P.stepFrames=4;F.update(game,1/60)
 assert(F.runSpeed==240,'bike pace was not observed')
-P.biking=false;P.moving=false;P.stepFrames=16
+P.biking=false;P.moving=false;P.stepFrames=4 -- last completed bike step is stale
+P.ordinaryStepFrames=function(run)assert(not run);return 16,false end
 row.py=240;row.trailSeq=1
 local y=row.py;F.update(game,1/60)
 assert(F.runSpeed==nil and y-row.py<=1.001,'dismount inherited bike catch-up speed')
+local y=row.py;F.update(game,1/60);assert(y-row.py<=1.001,'idle dismount reused stale bike duration')
 P.moving=true;P.stepFrames=8;F.update(game,1/60)
 P.moving=false;P.stepFrames=16;row.py=240;row.trailSeq=1
 local y=row.py;F.update(game,1/60)

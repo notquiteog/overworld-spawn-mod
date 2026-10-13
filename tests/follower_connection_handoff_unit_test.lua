@@ -848,7 +848,9 @@ do
  eq(world._wildsRunStepFrames,8,"idle foot preserves previous run cadence")
  g.save.onBike=true;world.player.moving=true;e:_observeTrailCadence(g,world,4,"land")
  eq(world._wildsRunStepFrames,4,"bike has its own observed cadence")
- g.save.onBike=false;world.player.moving=false;e:_observeTrailCadence(g,world,16,"land")
+ g.save.onBike=false;world.player.moving=false
+ eq(e:_observeTrailCadence(g,world,4,"land"),16,"idle dismount ignores stale bicycle step")
+ eq(e:_observeTrailCadence(g,world,4,"land"),16,"continued idle ignores stale bicycle step")
  check(world._wildsRunStepFrames==nil,"stationary dismount discards bicycle cadence")
  world.player.moving=true;e:_observeTrailCadence(g,world,16,"land")
  eq(world._wildsRunStepFrames,16,"walking after dismount does not inherit bike speed")
@@ -861,7 +863,8 @@ do
  check(world._wildsRunStepFrames==nil,"surface change clears prior cadence")
  world.playerState="bike";world.player.moving=true;e:_observeTrailCadence(g,world,4,"land")
  eq(world._wildsRunStepFrames,4,"Gen2 native World mode records bicycle pace")
- world.playerState="normal";world.player.moving=false;e:_observeTrailCadence(g,world,16,"land")
+ world.playerState="normal";world.player.moving=false
+ eq(e:_observeTrailCadence(g,world,4,"land"),16,"Gen2 idle dismount ignores stale stepFrames")
  check(world._wildsRunStepFrames==nil,"Gen2 native dismount discards bicycle cadence")
 end
 

@@ -2708,10 +2708,21 @@ function ControlEngine:_observeTrailCadence(game, ow, stepClock, surface)
   if ow._wildsRunLocomotion ~= locomotion then
     ow._wildsRunStepFrames = nil
     ow._wildsRunLocomotion = locomotion
+    -- Native dismount updates mode before the next step replaces its duration.
+    -- Ignore that stale completed bicycle step throughout the idle interval.
+    ow._wildsIdleStepFrames = not p.moving and 16 or nil
+    if ow._wildsIdleStepFrames and ow.playerState then
+      local ok, Player = pcall(require, "src.world.gen2.Player")
+      if ok then ow._wildsIdleStepFrames = Player.STEP_FRAMES or 16 end
+    elseif ow._wildsIdleStepFrames and p.stepLength then
+      ow._wildsIdleStepFrames = p:stepLength()
+    end
   end
+  if p.moving then ow._wildsIdleStepFrames = nil end
   if p.moving and not p.hopStep and not p.jumping then
     ow._wildsRunStepFrames = math.min(ow._wildsRunStepFrames or stepClock, stepClock)
   end
+  return ow._wildsIdleStepFrames or stepClock
 end
 
 function ControlEngine:syncTrailers(game, ow, opts)
@@ -2816,7 +2827,7 @@ function ControlEngine:syncTrailers(game, ow, opts)
   local mapEnter = opts.mapEnter == true
   local stepClock = p.stepFramesCur or p.stepFrames
     or (anchor and (anchor.stepFramesCur or anchor.stepFrames)) or 16
-  self:_observeTrailCadence(game, ow, stepClock, surface)
+  stepClock = self:_observeTrailCadence(game, ow, stepClock, surface)
 
   -- Surface transition: reseed once so trail goals leave the frozen shore cell.
   -- Sprite presentation is rebound after composition (existing NPCs keep
@@ -3465,6 +3476,7 @@ function ControlEngine:_chainCatchUpSteps(game, ow, stepClock)
   local facing = (anchor and anchor.facing) or (p and p.facing) or "down"
   stepClock = stepClock or (p and (p.stepFramesCur or p.stepFrames)) or 16
   local surface = self:_trailSurface(ow, game)
+  stepClock = ow._wildsIdleStepFrames or stepClock
   local assigned = 0
   -- Track cells occupied by other trailers (including mid-step targets)
   -- so followers can't step on top of each other — the root cause of

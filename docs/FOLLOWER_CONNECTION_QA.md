@@ -42,3 +42,11 @@ Gen3 240px/s bike→stationary foot (at most60px/s), and subsequent120px/s foot 
 retained while idle. Seven targeted suites pass: connection handoff, Gen3 speed,
 trail spacing, water movement, Gen3 underwater, Gen2 runtime and sync no-op.
 This follow-up is code/unit verification; no additional runtime was requested.
+
+Native dismount can also leave the last completed bicycle step duration in
+`stepFramesCur`/`stepFrames` while idle. An idle mode change therefore uses the
+public native base cadence (`stepLength` for Gen1, `Player.STEP_FRAMES` for Gen2,
+`ordinaryStepFrames(false)` for Gen3) until a genuine new player step supplies
+its duration. Chained catch-up uses the same override. Regressions deliberately
+retain a stale four-frame bicycle duration through repeated idle updates; all
+seven focused suites still pass. No player timing/state fields are changed.
