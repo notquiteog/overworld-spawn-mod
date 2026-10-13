@@ -35,6 +35,8 @@ return function(mod, base)
     if data.release then data:release()end
    end
   end
+  -- Native 2D and optional 3D consumers must agree on the visible baseline.
+  spr.drawOffY=groundPadding or 0
   spr.groundPadding=groundPadding
   spr.groundPaddingByFrame=groundPaddingByFrame
   A.sprites[id]=spr;return spr

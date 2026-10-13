@@ -220,6 +220,14 @@ function SpriteService:resolveFollowerSprite(opts)
 end
 
 
+-- Share the same ground anchor for native GB/GBC and optional 3D renderers.
+local resolveFollowerSprite=SpriteService.resolveFollowerSprite
+function SpriteService:resolveFollowerSprite(opts)
+  local def=resolveFollowerSprite(self,opts)
+  if not def or def.surface=='water' or def.surface=='surfing' then return def end
+  return V.require('sprite_footing').apply(def)
+end
+
 --- Resolve sprite definition for a Party Pokémon matching user's configured style.
 -- Cached per style+species+variant so the party menu doesn't re-run the full
 -- provider chain on every icon draw.
