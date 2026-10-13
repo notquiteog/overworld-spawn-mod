@@ -31,7 +31,41 @@ return function(mod,Actors,Presentation,busy)
  end
  function F.reset()
   for id in pairs(F.rows)do Actors.rows[id]=nil end
-  F.rows={};F.trail={};F.last=nil
+  F.rows={};F.trail={};F.last=nil;F.sequence=0;F.runSpeed=nil
+ end
+ -- The engine event identifies genuine walking connections. Coordinate
+ -- transforms come from its public connection API, never from a guessed
+ -- player delta (the entry event precedes the seam step).
+ local exited,pending
+ if mod.events and mod.events.on then
+  mod.events:on('map.exited',function()exited=Map.currentDef and Map.currentDef()end)
+  mod.events:on('map.entered',function(ev)
+   pending=nil
+   if ev and ev.via=='connection' and exited then
+    local C=require('src.core.game3.connections')
+    for _,c in ipairs(C.each(exited))do if c.map==ev.mapId then
+     local w,h=C.sizeOf(exited)
+     local x,y
+     -- localPos clips along the strip; derive the same unrestricted frame.
+     local nw,nh=C.sizeOf(ev.map)
+     x=c.dir=='west'and nw or c.dir=='east'and-w or -(c.offset or 0)
+     y=c.dir=='north'and nh or c.dir=='south'and-h or -(c.offset or 0)
+     pending={x=x,y=y};break
+    end end
+   end
+   exited=nil
+  end)
+ end
+ function F.mapChanged()
+  local shift=pending;pending=nil
+  if not shift then F.reset();return end
+  for _,c in ipairs(F.trail)do c.x,c.y=c.x+shift.x,c.y+shift.y end
+  if F.last then F.last.x,F.last.y=F.last.x+shift.x,F.last.y+shift.y end
+  for id,row in pairs(F.rows)do
+   row.px,row.py=row.px+shift.x*16,row.py+shift.y*16
+   row.cellX,row.cellY=row.cellX+shift.x,row.cellY+shift.y
+   row.map=Map.current;Actors.rows[id]=row
+  end
  end
  local function safe(c)
   return c and Collision.isWalkable(c.x,c.y)and not Collision.isWater(c.x,c.y)
@@ -45,10 +79,12 @@ return function(mod,Actors,Presentation,busy)
   local last=F.last
   if last and(last.x~=at.x or last.y~=at.y)then
    if math.abs(last.x-at.x)+math.abs(last.y-at.y)>2 then F.reset()
-   else F.trail[#F.trail+1]=last end
+   else F.sequence=(F.sequence or 0)+1;last.seq=F.sequence;F.trail[#F.trail+1]=last end
   end
   F.last=at
-  while #F.trail>32 do table.remove(F.trail,1)end
+  while #F.trail>256 do table.remove(F.trail,1)end
+  local speed=960/math.max(1,tonumber(Player.stepFrames)or 16)
+  if Player.moving and not Player.jumping then F.runSpeed=math.max(F.runSpeed or speed,speed)end
   local desired={};local controlled=F.controlled(game)
   local rideMod=mod.find and mod.find('DRAMATIC_SKY_RIDE');local ride=rideMod and rideMod.exports
   local showMounted=ride and ride.shouldShowFollowers and ride.shouldShowFollowers()
@@ -68,16 +104,24 @@ return function(mod,Actors,Presentation,busy)
   local keep={}
   for i,entry in ipairs(desired)do
    local id=-i;local c=F.trail[#F.trail-(i-1)*2]
-   if safe(c)and entry.gid then
+   if c and entry.gid and (F.rows[id] or safe(c))then
     local row=F.rows[id]
-    if not row then row=Actors.add(id,Map.current,c.x,c.y,entry.gid)end
+    if not row then row=Actors.add(id,Map.current,c.x,c.y,entry.gid);row.trailSeq=c.seq end
+    -- Follow each traversed corner instead of cutting diagonally across walls.
+    local destination=c
+    if row.trailSeq and c.seq then
+     for _,point in ipairs(F.trail)do if point.seq>row.trailSeq and point.seq<=c.seq then destination=point;break end end
+    end
+    c=destination
     row.graphicsId=entry.gid;row.mon=entry.mon;row.trainer=entry.trainer;row.moving=false
     local dx,dy=c.x*16-row.px,c.y*16-row.py;local dist=math.abs(dx)+math.abs(dy)
-    if dist>48 then row.px,row.py=c.x*16,c.y*16
-    elseif dist>.1 and not busy()then
-     local part=math.min(1,dt*100/dist);row.px=row.px+dx*part;row.py=row.py+dy*part;row.moving=true
+    if dist>.1 and not busy()then
+     local behind=math.abs((Player.px or Player.cellX*16)-row.px)+math.abs((Player.py or Player.cellY*16)-row.py)>i*32+16
+     local pace=behind and math.max(speed,F.runSpeed or speed)or speed
+     local part=math.min(1,dt*pace/dist);row.px=row.px+dx*part;row.py=row.py+dy*part;row.moving=true
      row.facing=math.abs(dx)>math.abs(dy)and(dx>0 and'right'or'left')or(dy>0 and'down'or'up')
     end
+    if math.abs(row.px-c.x*16)+math.abs(row.py-c.y*16)<.1 then row.trailSeq=c.seq end
     row.cellX=math.floor((row.px+8)/16);row.cellY=math.floor((row.py+8)/16)
     row.animClock=(row.animClock or 0)+(row.moving and dt*60 or 0);keep[id]=row
    end

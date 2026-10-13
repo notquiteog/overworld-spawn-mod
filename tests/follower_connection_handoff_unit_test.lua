@@ -808,6 +808,37 @@ do
   }) == false, "explicit warp is not a walking seam")
 end
 
+-- Current Gen2 neighbors expose an id, not a preconstructed map.
+do
+ local e=makeEngine();local map=makeMap("NEW_BARK_TOWN","JOHTO");map.def.environment="TOWN"
+ package.loaded["src.world.Map"]={isOutside=function()return false end}
+ check(e:_isOutsideMap(game,map),"native Gen2 environment supersedes Gen1 tileset classifier")
+ local neighbor=makeMap("ROUTE_29")
+ local world={map=map,_wildsFollowerSeamActive=true,neighbors={{id="ROUTE_29",ox=-160,oy=0}},connectionMap=function(_,id)assert(id=="ROUTE_29");return neighbor end}
+ local found,x,y=e:_followerMapCell(world,-1,4)
+ check(found==neighbor and x==9 and y==4,"native id-only neighbor resolves seam follower collision")
+ package.loaded["src.world.Map"]=nil
+end
+
+-- Catch-up uses the player's observed running cadence, never doubles it.
+do
+ local e=makeEngine();local npc=makeTrailer(1,{},0,0)
+ local world={map=makeMap("ROUTE"),player={cellX=8,cellY=0,stepFrames=16},pokepcTrailHead={x=8,y=0},_wildsRunStepFrames=8}
+ e._pickTrailerStep=function()return{x=1,y=0,dir="right"}end
+ e.ledgeStep=function()return false end
+ check(e:_assignTrailerStep(game,world,npc,7,0,"land","party_trailer",16,"right",nil,1),"lagging follower starts continuous catch-up")
+ eq(npc.stepFrames,8,"lagging follower uses actual previous running cadence")
+ e._pickTrailerStep=function()return nil end
+ local x,y=npc.px,npc.py
+ e:_assignTrailerStep(game,world,npc,20,0,"land","party_trailer",16,"right",nil,1)
+ check(npc.px==x and npc.py==y,"blocked distant follower never teleports to goal")
+ npc.moving=false;world.pokepcTrailers={npc};world.pokepcTrailCells={{x=7,y=0}};world._wildsPackWalking=false
+ e._trailAnchor=function()return world.player end;e._trailSurface=function()return "land"end
+ e.isFollowerCellAllowed=function()return true end
+ e._pickTrailerStep=function()return{x=1,y=0,dir="right"}end
+ check(e:_chainCatchUpSteps(game,world)>0,"idle trainer lets follower finish existing trail")
+end
+
 if failures > 0 then
   io.stderr:write(string.format("\n%d failure(s)\n", failures))
   os.exit(1)

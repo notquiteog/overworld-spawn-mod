@@ -1,3 +1,7 @@
+## Unreleased
+
+Preserve follower actors and trails across native connected-map crossings. Resolve Crystal neighbor collision using the engine map IDs. Followers reuse native running cadence when lagging and finish catching up after the player stops; Gen3 followers follow recorded corners without distance-triggered teleportation. Door/warp reset and underwater suppression remain intact. See `docs/FOLLOWER_CONNECTION_QA.md` for exact verification scope.
+
 ## 2.6.2 — 2026-10-13
 
 Ground all follower styles using visible sprite footing, preserve intentional water anchors and authored animation bob, and refresh geometry-only sprite definition changes. Gen3 native sprites now use the same transparent-padding grounding as the voxel view. Focused sprite-footing, surface/runtime/underwater follower and cross-generation grounding tests pass; Crystal native and voxel captures inspected on Gen1Recomp 0.3.85.

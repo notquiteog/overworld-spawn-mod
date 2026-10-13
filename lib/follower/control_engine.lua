@@ -1963,6 +1963,9 @@ function ControlEngine:_followerMapCell(ow, x, y)
   if not (ow and ow._wildsFollowerSeamActive) then return nil end
   for _, nb in ipairs(ow.neighbors or {}) do
     local nmap = nb and nb.map
+    if not nmap and nb and nb.id and type(ow.connectionMap) == "function" then
+      nmap = ow:connectionMap(nb.id)
+    end
     local ox = tonumber(nb and nb.ox)
     local oy = tonumber(nb and nb.oy)
     if nmap and ox and oy then
@@ -2057,10 +2060,16 @@ local function translateTrailer(npc, dx, dy)
   if npc.targetY ~= nil then npc.targetY = npc.targetY + dy end
   if npc.goalX ~= nil then npc.goalX = npc.goalX + dx end
   if npc.goalY ~= nil then npc.goalY = npc.goalY + dy end
+  if npc._wildsGoalX ~= nil then npc._wildsGoalX = npc._wildsGoalX + dx end
+  if npc._wildsGoalY ~= nil then npc._wildsGoalY = npc._wildsGoalY + dy end
 end
 
 function ControlEngine:_isOutsideMap(game, map)
   if not (map and map.def) then return false end
+  if map.def.environment ~= nil then
+    local env = tostring(map.def.environment):lower()
+    return env == "town" or env == "route" or env == "outdoor"
+  end
   local Map = tryRequire("src.world.Map")
   local FieldDefaults = tryRequire("src.world.FieldDefaults")
   if Map and type(Map.isOutside) == "function" then
@@ -2790,6 +2799,9 @@ function ControlEngine:syncTrailers(game, ow, opts)
   local mapEnter = opts.mapEnter == true
   local stepClock = p.stepFramesCur or p.stepFrames
     or (anchor and (anchor.stepFramesCur or anchor.stepFrames)) or 16
+  if p.moving and not p.hopStep and not p.jumping then
+    ow._wildsRunStepFrames = math.min(ow._wildsRunStepFrames or stepClock, stepClock)
+  end
 
   -- Surface transition: reseed once so trail goals leave the frozen shore cell.
   -- Sprite presentation is rebound after composition (existing NPCs keep
@@ -3366,14 +3378,7 @@ function ControlEngine:_assignTrailerStep(game, ow, npc, gx, gy, surface, role,
     return false
   end
   if not step then
-    -- No valid adjacent cell (wall pocket). Only hard-warp when the trailer
-    -- is so far that waiting would strand it forever; mid-range blocked
-    -- trailers wait for the goal to shift instead of teleporting (teleports
-    -- read as "dragged along" jumps on followers 2+).
-    if far > 8 then
-      placeTrailerAt(npc, gx, gy, npc.facing or facing)
-      npc._wildsGoalX, npc._wildsGoalY = nil, nil
-    end
+    -- Wait for a legal path; ordinary lag must never teleport through walls.
     return false
   end
   local dir = step.dir
@@ -3403,13 +3408,13 @@ function ControlEngine:_assignTrailerStep(game, ow, npc, gx, gy, surface, role,
     end
   end
   -- Normal cadence at 1-cell spacing. Trailers that fell behind (blocked
-  -- corner, spawn, surface change) walk at double cadence until they close
+  -- corner, spawn, surface change) reuse native running cadence until they close
   -- the gap; the catch-up pass chains the next step the moment one lands so
   -- the straggler moves continuously instead of bursting 8 frames then
   -- freezing 8 frames waiting for the next goal shift (the tick-tock drag).
   -- Ledge hops always use full-length frames for the arc animation.
   --
-  -- Double cadence is reserved for GENUINE stragglers — a trailer more than
+  -- Running cadence is reserved for GENUINE stragglers — a trailer more than
   -- one cell behind its convoy slot (head-distance > slot + 1).  On a
   -- reversal the tightly packed train's trail-history goals can jump 2+ cells
   -- (doubled-back lag indexing) while every member is still right behind the
@@ -3421,7 +3426,7 @@ function ControlEngine:_assignTrailerStep(game, ow, npc, gx, gy, surface, role,
     and (math.abs((npc.cellX or 0) - hx) + math.abs((npc.cellY or 0) - hy)) or 0
   local lagging = headDist > (slot or 1) + 1
   if not npc.hopStep and far > 1 and lagging then
-    npc.stepFrames = math.max(1, math.floor(stepClock / 2))
+    npc.stepFrames = math.min(stepClock, ow._wildsRunStepFrames or stepClock)
   else
     npc.stepFrames = stepClock
   end
@@ -3433,14 +3438,11 @@ function ControlEngine:_assignTrailerStep(game, ow, npc, gx, gy, surface, role,
 end
 
 --- Chain catch-up steps: a trailer that just landed but is still short of
--- its goal starts the next step immediately (double cadence), so it closes
+-- its goal starts the next step immediately (native running cadence), so it closes
 -- the gap continuously instead of freezing until the next goal shift.
 function ControlEngine:_chainCatchUpSteps(game, ow, stepClock)
-  -- Only chase goals while the pack is actually walking: once the player
-  -- stops, stragglers hold position (they resume catching up on the next
-  -- walk) instead of pacing toward stale goals — that pacing is what made
-  -- idle followers 2+ bob up and down in place.
-  if ow._wildsPackWalking ~= true then return 0 end
+    -- A stopped player must allow the already recorded trail to drain.
+  -- Goals remain fixed; no new idle movement is invented.
   local trailers = ow.pokepcTrailers or {}
   local goals = ow.pokepcTrailCells or {}
   local p = ow.player
@@ -3509,7 +3511,7 @@ function ControlEngine:_chainCatchUpSteps(game, ow, stepClock)
             if npc.targetX ~= nil and npc.targetY ~= nil then
               occupied[npc.targetX .. "," .. npc.targetY] = true
             end
-            -- Chain at catch-up cadence for normal steps; ledge hops keep
+            -- Chain at native catch-up cadence for normal steps; ledge hops keep
             -- full-length frames so the arc animation plays out properly.
             -- Same straggler gate as the main assignment: mid-reversal-fold
             -- trailers re-step immediately (no freeze) but at NORMAL cadence
@@ -3521,7 +3523,7 @@ function ControlEngine:_chainCatchUpSteps(game, ow, stepClock)
                 and (math.abs((npc.cellX or 0) - chx)
                      + math.abs((npc.cellY or 0) - chy)) or 0
               if headDist > i + 1 then
-                npc.stepFrames = math.max(1, math.floor(stepClock / 2))
+                npc.stepFrames = math.min(stepClock, ow._wildsRunStepFrames or stepClock)
               else
                 npc.stepFrames = stepClock
               end
@@ -3542,7 +3544,7 @@ function ControlEngine:advanceAllTrailers(ow)
   local n = 0
   for _, trailer in ipairs(ow.pokepcTrailers or {}) do
     -- Propagate the pack-motion gate so walkPhase can sample it at draw time.
-    trailer._wildsPackWalking = packWalking
+    trailer._wildsPackWalking = packWalking or trailer.moving == true
     if ControlEngine.advanceTrailerStep(trailer, ow.map, ow.entities, self.diag) then
       n = n + 1
     end

@@ -297,7 +297,7 @@ return function(mod)
   if S.map~=Map.current then
    Catching.resetInput()
    if S.shared and S.shared.role=='host'and S.map then local old,rows=Shared.snapshot();S.cache[old]=rows end
-   S.map=Map.current;S.spawns={};Actors.clear();Followers.reset();S.signature=signature()
+   S.map=Map.current;S.spawns={};Actors.clear();Followers.mapChanged(g);S.signature=signature()
    if S.shared and S.cache[S.map]then Shared.apply(S.map,S.cache[S.map])else populate()end
   end
   dt=math.min(.1,math.max(0,dt or 0));S.elapsed=S.elapsed+dt
