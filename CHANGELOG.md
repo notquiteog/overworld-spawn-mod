@@ -1,3 +1,7 @@
+## 2.6.4 — 2026-10-15
+
+Maintenance packaging release for the coordinated seven-mod update. Runtime behavior is unchanged from 2.6.3; existing optional integrations and independent installation remain supported.
+
 ## 2.6.3 — 2026-10-13
 
 - Preserve follower identity and recorded paths across native connected-map boundaries.
