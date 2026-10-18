@@ -8,9 +8,9 @@ return function(mod,Actors)
  local pmd=assert((loadstring or load)(assert(mod:read('assets/pmdcollab/sprite_table.lua'))))()
  local P={}
  local function imageAt(path)
-  local bytes=mod:read(path);if not bytes then return end
-  local ok,img=pcall(function()return love.graphics.newImage(love.filesystem.newFileData(bytes,path))end)
-  if ok then img:setFilter('nearest','nearest');return img end
+  -- The engine asset API works in the sandbox and packaged mobile archives.
+  local ok,img=pcall(function()return mod.assets:image(path)end)
+  if ok and img then img:setFilter('nearest','nearest');return img end
  end
  local function register(key,image,w,h,rows,anchorX,anchorY)
   if not image then return end

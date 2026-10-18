@@ -14,7 +14,7 @@ game.input={isDown=function()return false end,wasPressed=function()return false 
 local battle,talk,catches=0,0,0
 local function fakeImage(w,h)return{getDimensions=function()return w,h end,setFilter=function()end}end
 local function dimension(bytes,offset)local n=0;for i=offset,offset+3 do n=n*256+bytes:byte(i)end;return n end
-_G.love={math={random=math.random},keyboard={isDown=function()return false end},filesystem={newFileData=function(bytes,path)return{bytes=bytes,path=path}end},graphics={}}
+_G.love=setmetatable({math={random=math.random},keyboard={isDown=function()return false end},graphics={}}, {__index=function(_,key)if key=='filesystem'then error('blocked sandbox filesystem')end end})
 for _,key in ipairs({'push','pop','setCanvas','clear','setColor','draw','ellipse','setScissor','setShader','circle','rectangle','print','translate','scale'})do love.graphics[key]=function()end end
 love.graphics.newQuad=function(x,y,w,h,iw,ih)assert(x>=0 and y>=0 and w>0 and h>0 and x+w<=iw and y+h<=ih,'quad exceeds sheet');return{}end
 love.graphics.newShader=function()return{}end
@@ -44,7 +44,8 @@ local modules={
  ['src.core.game3.safari']={isActive=function()return false end},['src.mods.Runtime']={emit=function()end},
 }
 for name,value in pairs(modules)do package.loaded[name]=value end
-local mod={id='overworld_wild_spawns',world={game=game,startWildBattle=function()battle=battle+1;return true end,queueScript=function()talk=talk+1 end},exports={},log={info=function()end},read=function(_,path)return read(path)end,options={get=function(_,key)return options[key]end,define=function(_,rows)for _,r in ipairs(rows)do if options[r.key]==nil then options[r.key]=r.default end end;return rows end},hooks={wrap=function(_,key,fn)hooks[key]=fn end}}
+local assetReads=0
+local mod={assets={image=function(_,path)assetReads=assetReads+1;local bytes=assert(read(path),'missing optional art');return fakeImage(dimension(bytes,17),dimension(bytes,21))end},id='overworld_wild_spawns',world={game=game,startWildBattle=function()battle=battle+1;return true end,queueScript=function()talk=talk+1 end},exports={},log={info=function()end},read=function(_,path)return read(path)end,options={get=function(_,key)return options[key]end,define=function(_,rows)for _,r in ipairs(rows)do if options[r.key]==nil then options[r.key]=r.default end end;return rows end},hooks={wrap=function(_,key,fn)hooks[key]=fn end}}
 assert(loadfile('lib/gen3/init.lua'))()(mod)
 local S=mod.exports.gen3
 local function count()local n=0;for _ in pairs(S.spawns)do n=n+1 end;return n end
@@ -106,4 +107,5 @@ local F=mod.exports.gen3Followers;F.select(game,game.session.party[2]);eq(F.lead
 local moved=table.remove(game.session.party,2);game.session.party[#game.session.party+1]=moved;eq(F.leader(game),moved,'selection survives party reorder')
 local R=assert(loadfile('lib/gen3/rules.lua'))();local get=function(k)return options[k]end
 options.water_spawns='classic_encounters';eq(R.visibleTerrain(get,'water'),false,'classic hides visible water')
+eq(assetReads>0,true,'native art resolves through sandbox asset API')
 print('PASS Gen3 settings parity ('..checkCount..' assertions)')
