@@ -1,3 +1,7 @@
+## 2.6.5 — 2026-10-17
+
+Load overworld follower and swimmer sheets through the public packaged asset API. Fixes sandbox fallback to static front sprites. Native FireRed all-seven-mod fixture and focused sandbox checks pass.
+
 ## 2.6.4 — 2026-10-15
 
 Maintenance packaging release for the coordinated seven-mod update. Runtime behavior is unchanged from 2.6.3; existing optional integrations and independent installation remain supported.
