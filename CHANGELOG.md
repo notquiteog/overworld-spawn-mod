@@ -1,3 +1,9 @@
+## 2.6.6 — 2026-10-20
+
+Consolidate the outstanding optional NPC AI dialogue and SpriteCollab format-report branches onto the current cross-generation mod. AI Dialogues and AI Memory are **OFF by default**, including missing or invalid preferences; providers remain optional. Existing Gen3 gameplay continues its separate native adapter without an AI NPC hook.
+
+Retain native dialogue before the optional Talk offer, use native generation fonts/frames, and guard input/request ownership across map changes, disable and launcher return. Async requests use wall-time deadlines; private plaintext provider configuration uses public mod.cache storage. No API key is shipped or stored in normal options. Historical branch ancestry is recorded after porting its unique features; existing PMD sprite/version work is preserved without restoring old snapshots. See docs/BRANCH_CONSOLIDATION_2026-10-20.md for exact scope and verification limits.
+
 ## 2.6.5 — 2026-10-17
 
 Load overworld follower and swimmer sheets through the public packaged asset API. Fixes sandbox fallback to static front sprites. Native FireRed all-seven-mod fixture and focused sandbox checks pass.

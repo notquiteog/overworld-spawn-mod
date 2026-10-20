@@ -14,6 +14,7 @@
 --   lib/followers_water_compat.lua - optional Followers EX water sprites
 --   lib/follower/           - unified follower core (selection/lifecycle/talk)
 --   lib/catching/           - optional overworld Poké Ball catching
+--   lib/ai/                 - optional AI NPC dialogues (default off)
 --   lib/diagnostics.lua     - status derivation for HUD/logs
 --   options.lua             - Mod Manager option schema
 --
@@ -24,7 +25,7 @@
 -- DramaticShapeVoxelMod is optional; base Gen1Recomp 2D rendering is enough.
 
 return function(mod)
-  mod.exports.version = "2.6.5"
+  mod.exports.version = "2.6.6"
   local GV=require("src.core.GameVersion")
   if GV.generation()==3 then return assert((loadstring or load)(assert(mod:read("lib/gen3/init.lua")),"@wilds/gen3/init"))()(mod) end
   local V = { mod = mod, path = mod.path }
@@ -165,6 +166,26 @@ return function(mod)
   if supports("ambient") then
     ambient:install()
   end
+
+  -- Optional AI NPC dialogues (default OFF). Install after ambient so talk
+  -- wraps chain correctly. Zero work when disabled.
+  local Ai = V.require("ai/init")
+  local aiDialogues = Ai.new(mod, { follower = follower })
+  pcall(function() aiDialogues:install() end)
+  -- Public frame hook runs while native text/input screens own the stack too.
+  mod.hooks:wrap("input.step", function(nextFn, game, dt)
+    nextFn(game, dt)
+    aiDialogues:tick()
+  end)
+  mod.hooks:wrap("input.key", function(nextFn, game, event)
+    if aiDialogues:handleKey(game, event) then return end
+    return nextFn(game, event)
+  end)
+  mod.hooks:wrap("core.quit_to_launcher", function(nextFn, ...)
+    local result = nextFn(...)
+    if result ~= false then aiDialogues:uninstall() end
+    return result
+  end)
 
   local OverworldCatching = V.require("catching/init")
   local catching = OverworldCatching.new(mod, logic)
@@ -549,6 +570,7 @@ return function(mod)
   mod.exports.ownsOverworldCatchKey = function(game,key)
     return catching.desktopInput and catching.desktopInput:owns(game,key) or false
   end
+  mod.exports.aiDialogues = aiDialogues
   mod.exports.handleOptionsChanged = handleOptionsChanged
   mod.exports.isBattleableWild = Config.isBattleableWild
   mod.exports.overworldCatchingEnabled = function()
