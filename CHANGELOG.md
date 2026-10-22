@@ -1,3 +1,8 @@
+## 2.6.8 — 2026-10-22
+
+Align the exported provider version with the package manifest. Supersedes 2.6.7.
+AI chat and conversation memory remain OFF by default.
+
 ## 2.6.7 — 2026-10-22
 
 Include the preserved AI dialogue and SpriteCollab branch work. AI chat and
