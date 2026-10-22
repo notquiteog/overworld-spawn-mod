@@ -1,3 +1,9 @@
+## 2.6.7 — 2026-10-22
+
+Include the preserved AI dialogue and SpriteCollab branch work. AI chat and
+conversation memory default OFF, including missing or invalid preferences.
+No provider, credentials or companion mod is required.
+
 ## 2.6.6 — 2026-10-20
 
 Consolidate the outstanding optional NPC AI dialogue and SpriteCollab format-report branches onto the current cross-generation mod. AI Dialogues and AI Memory are **OFF by default**, including missing or invalid preferences; providers remain optional. Existing Gen3 gameplay continues its separate native adapter without an AI NPC hook.
