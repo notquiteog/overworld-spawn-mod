@@ -17,7 +17,8 @@
   "optional_dependencies": [],
   "conflicts": [],
   "permissions": [
-    "engine_internals"
+    "engine_internals",
+    "network"
   ],
   "affects_link": false,
   "options_schema": "options.lua",
