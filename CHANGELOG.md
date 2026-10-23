@@ -1,3 +1,7 @@
+## 2.6.9 — Portable API3 (2026-10-23)
+
+Use public game access, canonical wild battle entry and exact detached-party selection. Move native settings to public registered screens and correct GBA fonts. Remove legacy asset-file retries and unsupported Gen2 icon facade reads. Requires Gen1Recomp 0.3.96 or newer; integrations remain optional. AI chat and memory remain OFF by default.
+
 ## 2.6.8 — 2026-10-22
 
 Align the exported provider version with the package manifest. Supersedes 2.6.7.
