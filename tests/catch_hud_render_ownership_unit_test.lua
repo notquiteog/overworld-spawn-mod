@@ -133,8 +133,7 @@ local function makeV(isGen2)
         set = function(_, k, v) optionStore[k] = v end,
       },
       -- Gen1 catchWorld uses mod.world:overworld(); Gold uses game.world.
-      world = {
-        game = game,
+      game = game, world = {
         overworld = function() return ow end,
       },
       assets = { path = function(_, rel) return rel end },

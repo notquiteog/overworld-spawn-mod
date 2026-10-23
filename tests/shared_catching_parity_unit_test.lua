@@ -99,7 +99,7 @@ for generation=1,2 do
   eq(catcher.sharedPending,nil,'authority denial clears pending');eq(catcher.phase,'idle','denial unblocks input')
 
   -- Public provider and the actual release method must use the same contract.
-  mod.world={game=game};mod.hooks={wrap=function()end}
+  mod.game=game;mod.world={};mod.hooks={wrap=function()end}
   logic._ow=function()return ow end;logic.clearAll=function()end;logic.initializeForMap=function()end
   modules.shared_ambient=function()return{configure=function()end}end
   local provider=V.require('shared_spawns')(mod,logic,{},{} )

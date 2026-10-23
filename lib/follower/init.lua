@@ -38,7 +38,7 @@ function Follower:isSupported(game)
   local GameCompat = V.require("game_compat")
   local mod = self.mod
   game = game
-    or (mod and (mod.game or (mod.world and mod.world.game)))
+    or (mod and mod.game)
   return GameCompat.supportsFeature("followers", mod, game) == true
 end
 
@@ -446,8 +446,8 @@ end
 
 function Follower:onMapEntered(ev)
   local game = ev and (ev.game or (ev.world and ev.world.game))
-  if not game and self.mod and self.mod.world then
-    game = self.mod.world.game
+  if not game and self.mod then
+    game = self.mod.game
   end
   local GameCompat = V.require("game_compat")
   local ow = GameCompat.liveOverworld(self.mod, game)
@@ -467,7 +467,7 @@ function Follower:onMapReloaded(ev)
   if not self.control._installed then return end
   local engine = self.control
   local game = ev and ev.game
-    or (self.mod and self.mod.world and self.mod.world.game)
+    or (self.mod and self.mod.game)
   pcall(function() engine:_ensureGen2WorldStepWrap(game) end)
   -- Remove all followers from the overworld immediately so they
   -- disappear during the reload (healing animation, etc.).
@@ -487,13 +487,13 @@ function Follower:onBattleEnded(ev)
   if not self.control or not self.control._installed then return end
   local engine = self.control
   local game = ev and ev.game
-    or (self.mod and self.mod.world and self.mod.world.game)
+    or (self.mod and self.mod.game)
   -- Never pass a cached ow: engine re-resolves GameCompat.liveOverworld.
   pcall(function() engine:onBattleEnded(game, nil, ev) end)
 end
 
 function Follower:onSaveLoaded()
-  local game = self.mod and self.mod.world and self.mod.world.game
+  local game = self.mod and self.mod.game
   self.settings:alignSave(game)
   self.lifecycle:onSaveLoaded(game)
   if game then
@@ -515,7 +515,7 @@ function Follower:onOptionsChanged(payload)
   self.settings:onOptionsChanged(payload)
   if key == "follow_control" or key == "trainer_trail" or key == "follower_count"
       or key == "sprite_style" then
-    local game = self.mod and self.mod.world and self.mod.world.game
+    local game = self.mod and self.mod.game
     self.settings:alignSave(game)
     if self.control then
       -- Intentional count / mode changes may add or remove visible followers.

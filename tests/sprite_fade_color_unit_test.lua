@@ -30,12 +30,11 @@ local V = {
       end,
       set = function(_, k, v) optionStore[k] = v end,
     },
-    world = {
-      game = {
+    game = {
         save = { options = { modOptions = { overworld_wild_spawns = savedOpts } } },
         mods = { modOptions = { overworld_wild_spawns = savedOpts } },
       },
-    },
+
   },
   path = ".",
 }
@@ -84,7 +83,7 @@ eq(optionStore.sprite_fade, "faded", "setSpriteFade writes key")
 eq(Config.spriteOpacity(V.mod), 0.72, "set faded opacity")
 
 -- Sprite Color is not public. Legacy color_mode / classic requests stay colored.
-savedOpts = V.mod.world.game.save.options.modOptions.overworld_wild_spawns
+savedOpts = V.mod.game.save.options.modOptions.overworld_wild_spawns
 savedOpts.sprite_color = nil
 savedOpts.color_mode = "gbc"
 eq(Config.spriteColor(V.mod), "colored", "color_mode gbc is ignored (always colored)")

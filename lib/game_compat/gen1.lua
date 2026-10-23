@@ -139,14 +139,14 @@ function Gen1.encountersForMap(game, mapId)
   return game.data.encounters[mapId]
 end
 
---- Exact current Gen1 wild battle entry: queue start_battle wild species level.
+--- Validated public wild battle action; preserve the native refusal reason.
 function Gen1.startWildBattle(world, species, level)
-  if not (world and type(world.queueScript) == "function") then
+  if not (world and type(world.startWildBattle) == "function") then
     return nil, "no world"
   end
-  return world:queueScript({
-    { "start_battle", "wild", species, tonumber(level) or 5 },
-  })
+  -- API3 uses Gen1 species spelling in every generation.
+  species = ({ FARFETCH_D = "FARFETCHD", MR__MIME = "MR_MIME" })[species] or species
+  return world:startWildBattle(species, tonumber(level) or 5)
 end
 
 --- Gen1 trailer NPC: exact ControlEngine makeTrailer constructor.

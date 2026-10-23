@@ -284,7 +284,7 @@ function BehaviorTick:step(ctx)
   self._lastT = t
 
   local world = self.mod.world
-  local ow = GameCompat.liveOverworld(self.mod, world and world.game)
+  local ow = GameCompat.liveOverworld(self.mod, self.mod.game)
   if not ow or not ow.map or not ow.player then
     perf:endFrame(frameStart)
     return
@@ -299,7 +299,7 @@ function BehaviorTick:step(ctx)
   end
   if (t - (self._palettePollAt or 0)) >= BehaviorTick.PALETTE_POLL_INTERVAL then
     self._palettePollAt = t
-    self._paletteWatch:tick(world and world.game, ow)
+    self._paletteWatch:tick(self.mod.game, ow)
   end
 
   -- Voxel presence / adapter install: rare. Throttle safety poll.
@@ -363,7 +363,7 @@ function BehaviorTick:step(ctx)
   end
 
   local occupancy = logic.occupancy
-  local game = world and world.game
+  local game = self.mod.game
   local safariActive = false
   local cfg = self._cfgSnapshot
 
@@ -673,7 +673,7 @@ function BehaviorTick:drawFx(canvas, ctx)
   if Config.get(self.mod, "enable_grass_movement_effects") == false then return end
   local logic = self.logic
   local world = self.mod.world
-  local ow = GameCompat.liveOverworld(self.mod, world and world.game)
+  local ow = GameCompat.liveOverworld(self.mod, self.mod.game)
   if not ow or not ow.map then return end
 
   if logic.spawnFx then

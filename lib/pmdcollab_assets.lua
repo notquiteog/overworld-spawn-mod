@@ -23,6 +23,7 @@ local function loadLuaTable(mod, rel)
       end
       return nil, err
     end
+    return nil, "packaged table missing"
   end
   local root = (mod and mod.path) or "."
   local path = root .. "/" .. rel

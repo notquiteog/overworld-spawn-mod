@@ -422,7 +422,7 @@ do
         'production games includes gen1 and gen2')
   check(not raw:find("gen2compat", 1, true),
         "production manifest has no gen2compat key")
-  check(raw:find(">=0.0.0-0 <2.0.0", 1, true) ~= nil,
+  check(raw:find(">=0.3.96 <3.0.0", 1, true) ~= nil,
         "game_version range unchanged")
 end
 
@@ -510,35 +510,23 @@ end
 
 do
   setEngineVersion("gold")
-  local queued = {}
-  local world = {
-    queueScript = function(_, rows)
-      queued[#queued + 1] = rows
-      return true
-    end,
-  }
-  local ok = GameCompat.startWildBattle(world, "SENTRET", 3, { version = "gold" })
-  check(ok, "Gold startWildBattle queues")
-  eq(#queued, 1, "Gold battle queued once")
-  eq(queued[1][1][1], "start_battle", "Gold uses start_battle")
-  eq(queued[1][1][2], "wild", "Gold kind is wild")
-  eq(queued[1][1][3], "SENTRET", "Gold species preserved")
-  eq(queued[1][1][4], 3, "Gold level preserved")
+  local calls={}
+  local world={startWildBattle=function(_,species,level)calls[#calls+1]={species,level};return true end}
+  local ok=GameCompat.startWildBattle(world,"FARFETCH_D",3,{version="gold"})
+  check(ok,"Gold public wild battle starts")
+  eq(#calls,1,"Gold battle submitted once")
+  eq(calls[1][1],"FARFETCHD","Gold native alias becomes canonical ID")
+  eq(calls[1][2],3,"Gold level preserved")
 end
 
 do
   setEngineVersion("red")
-  local queued = {}
-  local world = {
-    queueScript = function(_, rows)
-      queued[#queued + 1] = rows
-      return true
-    end,
-  }
-  local ok = GameCompat.startWildBattle(world, "PIDGEY", 4, { version = "red" })
-  check(ok, "Gen1 startWildBattle still queues")
-  eq(queued[1][1][3], "PIDGEY", "Gen1 species preserved")
-  eq(queued[1][1][4], 4, "Gen1 level preserved")
+  local calls={}
+  local world={startWildBattle=function(_,species,level)calls[#calls+1]={species,level};return true end}
+  local ok=GameCompat.startWildBattle(world,"PIDGEY",4,{version="red"})
+  check(ok,"Gen1 public wild battle starts")
+  eq(calls[1][1],"PIDGEY","Gen1 species preserved")
+  eq(calls[1][2],4,"Gen1 level preserved")
 end
 
 ----------------------------------------------------------------

@@ -37,12 +37,11 @@ local V = {
       f:close()
       return data
     end,
-    world = {
-      game = {
+    world = {},
+    game = {
         save = { options = { modOptions = { overworld_wild_spawns = savedOpts } } },
         mods = { modOptions = { overworld_wild_spawns = savedOpts } },
       },
-    },
   },
   path = ".",
 }
@@ -112,18 +111,18 @@ end
 
 -- ------- Setter -------
 local ok, written = Config.setWaterMons(V.mod, "silhouettes", "test", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 check(ok == true, "setWaterMons accepts silhouettes")
 eq(written, "silhouettes", "setter returns mode")
 eq(savedOpts.water_spawns, "silhouettes", "persisted silhouettes")
 eq(savedOpts.enable_water_spawns, true, "enable alias true for silhouettes")
 
-ok = Config.setWaterMons(V.mod, false, "test", { game = V.mod.world.game, confirm = false })
+ok = Config.setWaterMons(V.mod, false, "test", { game = V.mod.game, confirm = false })
 check(ok == true, "setWaterMons accepts legacy false")
 eq(savedOpts.water_spawns, "classic_encounters", "false coerces to classic")
 
-ok = Config.setWaterMons(V.mod, true, "test", { game = V.mod.world.game, confirm = false })
+ok = Config.setWaterMons(V.mod, true, "test", { game = V.mod.game, confirm = false })
 eq(savedOpts.water_spawns, "swimming_sprites", "true coerces to swimming")
 
 check(Config.setWaterMons(V.mod, "nope", "t", { confirm = false }) == false,

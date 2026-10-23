@@ -40,12 +40,11 @@ local V = {
       f:close()
       return data
     end,
-    world = {
-      game = {
+    world = {},
+    game = {
         save = { options = { modOptions = { overworld_wild_spawns = savedOpts } } },
         mods = { modOptions = { overworld_wild_spawns = savedOpts } },
       },
-    },
   },
   path = ".",
 }
@@ -257,9 +256,9 @@ eq(fw.status.lastAction, "style_invalidated", "invalidateStyle works")
 
 -- Manifest / export version
 local mf = io.open("manifest.json", "r"):read("*a")
-check(mf:find('"2.2.0"', 1, true) ~= nil, "manifest 2.2.0")
+local declared=mf:match('"version"%s*:%s*"([^"]+)"');check(declared~=nil,"manifest version")
 local main = io.open("main.lua", "r"):read("*a")
-check(main:find('version = "2.2.0"', 1, true) ~= nil, "export version 2.2.0")
+check(main:find('version = "'..declared..'"', 1, true) ~= nil, "export matches manifest version")
 
 print("")
 if failures > 0 then

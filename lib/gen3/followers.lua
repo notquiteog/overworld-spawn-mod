@@ -157,7 +157,7 @@ return function(mod,Actors,Presentation,busy)
  local Menu=require('src.ui.game3.party_menu')
  local input=Menu.handleInput
  Menu.handleInput=function(buttons,...)
-  local game=mod.world.game
+  local game=mod.game
   local label=Menu.ACTIONS and Menu.ACTIONS[Menu.actionCursor or 1]
   local mon=Menu._party and Menu._party[Menu.cursor or 1]
   if Menu.mode=='action'and not Menu._battle and(label=='FOLLOW'or label=='DISMISS')and buttons:wasPressed('a')then

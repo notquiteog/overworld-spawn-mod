@@ -73,7 +73,7 @@ function RangePreview.isVoxelActive(mod, ow)
   -- Do not call mod.world:overworld() here. If `ow` was not supplied, resolve
   -- through the catching-only abstraction (safe on Gold).
   if not ow then
-    local game = mod.game or (mod.world and mod.world.game)
+    local game = mod.game
     ow = GameCompat.catchWorld(mod, game)
   end
   return owLooksVoxel(ow)

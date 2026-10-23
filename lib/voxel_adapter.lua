@@ -279,7 +279,7 @@ function VoxelAdapter:updateEntity(entity)
     -- Leaving Voxel: restore colour water sheet / drop hidden marker.
     if (entity.waterSilhouetteSheet == true or entity.waterHiddenShadow == true)
        and entity.render and entity.render.applyProviderSprite then
-      local game = self.mod.world and self.mod.world.game
+      local game = self.mod.game
       pcall(entity.render.applyProviderSprite, entity.render, entity, game)
     end
     return true
@@ -301,7 +301,7 @@ function VoxelAdapter:updateEntity(entity)
       or (WaterDisplay.isSilhouettes(self.mod) and entity.waterSilhouetteSheet ~= true)
       or (WaterDisplay.isHiddenSilhouettes(self.mod) and entity.waterHiddenShadow ~= true)
     if needRebind and entity.render and entity.render.applyProviderSprite then
-      local game = self.mod.world and self.mod.world.game
+      local game = self.mod.game
       pcall(entity.render.applyProviderSprite, entity.render, entity, game)
     end
     entity.shadowRendererMode = self._waterShadowDrawOk
@@ -310,7 +310,7 @@ function VoxelAdapter:updateEntity(entity)
   elseif (entity.waterSilhouetteSheet == true or entity.waterHiddenShadow == true)
      and entity.render and entity.render.applyProviderSprite then
     -- Left silhouettes / hidden mode while still in Voxel: restore colour sheet.
-    local game = self.mod.world and self.mod.world.game
+    local game = self.mod.game
     pcall(entity.render.applyProviderSprite, entity.render, entity, game)
     entity.shadowRendererMode = WaterShadowRenderer.MODE.NONE
   else

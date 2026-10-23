@@ -16,7 +16,7 @@ return function(mod)
  local function get(key)return mod.options:get(key)end
  local Identity=loadfile('identity')(mod)
  local S={map=nil,spawns={},elapsed=0,nextId=0,shared=nil,cache={},refill=0}
- local function game()return mod.world.game end
+ local function game()return mod.game end
  local function busy()
   local r=mod.find and mod.find('DRAMATIC_SKY_RIDE');local ex=r and r.exports
   if ex and ex.isFlying and ex.isFlying()then return true,'airborne' end

@@ -4,7 +4,7 @@ local V=...
 local Ambient=V.require('ambient_pokemon')
 return function(mod,manager,makeWorld)
   local A={};local authority,cache,remote,serial=nil,{},{},0
-  local function game()return mod.world.game end
+  local function game()return mod.game end
   local function collect(owner,map)
     local rows={}
     for npc in pairs(owner.active)do

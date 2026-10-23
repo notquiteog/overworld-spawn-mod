@@ -14,11 +14,13 @@ package.loaded['src.core.game3.battle']=Battle
 package.loaded['src.core.game3.summary_data']={isShiny=function(mon)return mon.personality==0 end}
 love={math={random=math.random}}
 local fail,blocked=false,false
-local mod={world={game={}}}
+local mod={game={},world={}}
+package.loaded['src.core.game3.pokemon']={keyName=function(id)assert(id==25);return 'PIKACHU'end}
 function mod.world:startWildBattle(species,level)
  if fail then error('SDK failure')end
  if blocked then return nil,'no healthy party'end
- return Bridge.startWild(nil,self.game,{species=species,level=level})
+ assert(species=='PIKACHU','public battle boundary must receive a canonical string')
+ return Bridge.startWild(nil,mod.game,{species=25,level=level})
 end
 local I=assert(loadfile('lib/gen3/identity.lua'))()(mod)
 local row=I.assign({species=25,level=12,personality=4294967295,shiny=true})
@@ -27,10 +29,10 @@ local a,b=scheduled();assert(a=='started' and b==17)
 assert(seen.enemy.mon.personality==4294967295 and seen.enemy.mon.isShiny==true and callback==true)
 row.shiny=false;assert(I.begin(row));scheduled();assert(seen.enemy.mon.isShiny==false)
 -- Identical species/level in a later unrelated battle must never inherit it.
-Bridge.startWild(nil,mod.world.game,{species=25,level=12});scheduled();assert(seen.enemy.mon.personality==nil and seen.enemy.mon.isShiny==nil)
+Bridge.startWild(nil,mod.game,{species=25,level=12});scheduled();assert(seen.enemy.mon.personality==nil and seen.enemy.mon.isShiny==nil)
 blocked=true;local ok,err=I.begin(row);assert(ok==nil and err=='no healthy party');blocked=false
 fail=true;ok,err=I.begin(row);assert(ok==nil and err:find('SDK failure'));fail=false
-Bridge.startWild(nil,mod.world.game,{species=25,level=12});scheduled();assert(seen.enemy.mon.personality==nil)
+Bridge.startWild(nil,mod.game,{species=25,level=12});scheduled();assert(seen.enemy.mon.personality==nil)
 assert(I.assign({personality=0}).shiny==true)
 for _,pid in ipairs({-1,4294967296,1.5,0/0})do local x=I.assign({personality=pid});assert(x.personality>=0 and x.personality<4294967296 and x.personality==math.floor(x.personality))end
 print('PASS Gen3 host identity, delayed native battle, pre-event shiny state, return values, refusal/error cleanup and unrelated battle isolation')

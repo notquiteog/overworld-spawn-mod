@@ -1,3 +1,7 @@
+## Portable API3 compatibility
+
+Requires official Gen1Recomp0.3.96 or later. Public options and registered native Gen3 settings screens, canonical encounter IDs and lifecycle ownership were audited across all eleven editions. See [contracts, native verification and limits](docs/PORTABLE_API3_2026-10-23.md).
+
 ## 2.5.0 — 2026-10-04
 
 The ball selector now yields to native Gen3 battles and trade/menu screens, including when the outer game phase remains field.

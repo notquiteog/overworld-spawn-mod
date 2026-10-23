@@ -11,7 +11,7 @@ return function(mod, logic, render, ambient)
   local simulation
   local Simulation=V.require("shared_simulation")
   local EncounterPick=V.require("encounter_pick")
-  local function game() return mod.world.game end
+  local function game() return mod.game end
   local function world() return logic:_ow(game()) end
   local function makeWorld(mapId,player)
     local g,w=game(),world();if not g or not w then return end

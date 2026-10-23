@@ -142,11 +142,10 @@ do
   local bucket = {}
   local modBucket = {
     id = "overworld_wild_spawns",
-    world = {
-      game = {
+    world = {},
+    game = {
         mods = { loader = { modOptions = { overworld_wild_spawns = bucket } } },
       },
-    },
     options = {
       get = function(_, k)
         -- Stale options:get still says 5 while bucket says 10.

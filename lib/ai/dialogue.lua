@@ -206,7 +206,7 @@ function Dialogue:installTalkWrap()
       return orig(selfOw, npc, done, ...)
     end
     local game = (selfOw and selfOw.game)
-      or (manager.mod.world and manager.mod.world.game)
+      or (manager.mod.game)
       or manager.mod.game
     local function queueOffer()
       if not manager._disposed and AiConfig.enabled(manager.mod) then

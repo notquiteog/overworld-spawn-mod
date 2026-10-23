@@ -325,7 +325,7 @@ function Config.migrateDevOverlayOption(mod)
     bucket[mod.id].debug = nil
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)
@@ -415,7 +415,7 @@ function Config.peekSavedOption(mod, key)
   if not mod then return nil, false end
   local buckets = {}
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options and game.save.options.modOptions then
     buckets[#buckets + 1] = game.save.options.modOptions[mod.id]
   end
@@ -529,7 +529,7 @@ function Config.migrateSpriteStyleOption(mod)
     end
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)
@@ -589,7 +589,7 @@ end
 local function resolveGame(mod, opts)
   opts = opts or {}
   if opts.game then return opts.game end
-  if mod and mod.world then return mod.world.game end
+  if mod then return mod.game end
   return nil
 end
 
@@ -746,7 +746,7 @@ function Config.migrateRandomEncountersOption(mod)
     end
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)
@@ -831,7 +831,7 @@ function Config.migrateWaterDisplayMode(mod)
       or mode == "silhouettes")
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)
@@ -1128,7 +1128,7 @@ function Config.migrateCaveSpawnMode(mod)
     end
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)
@@ -1277,7 +1277,7 @@ function Config.migrateSpriteFadeOption(mod)
     end
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)
@@ -1430,7 +1430,7 @@ function Config.migrateSpriteColorOption(mod)
     -- Do not delete legacy keys (color_mode / colored_sprites stay readable).
   end
   local world = mod.world
-  local game = world and world.game
+  local game = mod.game
   if game and game.save and game.save.options then
     game.save.options.modOptions = game.save.options.modOptions or {}
     write(game.save.options.modOptions)

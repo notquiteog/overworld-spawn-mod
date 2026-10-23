@@ -168,11 +168,11 @@ local mod = {
   },
   ui = {},
   exports = {},
+  game = goldGame,
   world = {
-    game = goldGame,
     overworld = function() return goldWorld end,
-    queueScript = function(_, rows)
-      battles[#battles + 1] = rows
+    startWildBattle = function(_, species, level)
+      battles[#battles + 1] = { species, level }
       return true
     end,
   },
@@ -258,13 +258,9 @@ logic.byMap["ROUTE_29"] = { record.id }
 
 local started = logic:_startBattle(record)
 check(started == true, "Gold wild battle starts from shared _startBattle")
-eq(#battles, 1, "Gold queueScript called once")
-local row = battles[1] and battles[1][1]
-check(row ~= nil, "queued script has a start_battle row")
-eq(row[1], "start_battle", "script op is start_battle")
-eq(row[2], "wild", "script kind is wild")
-eq(row[3], "SENTRET", "battle species matches overworld Sentret")
-eq(row[4], 3, "battle level matches overworld level 3")
+eq(#battles,1,"Gold public battle submitted once")
+eq(battles[1][1],"SENTRET","public battle species matches native Sentret")
+eq(battles[1][2],3,"public battle level matches native level3")
 check(logic.pendingBattle ~= nil, "pendingBattle blocks a second trigger")
 
 local started2 = logic:_startBattle(record)
@@ -284,8 +280,8 @@ local blocked = logic:onCollision(false, {
 })
 eq(blocked, false, "collision consumes the walk")
 eq(#battles, 1, "collision starts exactly one Gold battle")
-eq(battles[1][1][3], "SENTRET", "collision battle species is Sentret")
-eq(battles[1][1][4], 3, "collision battle level is 3")
+eq(battles[1][1], "SENTRET", "collision battle species is Sentret")
+eq(battles[1][2], 3, "collision battle level is 3")
 
 -- Town Pokémon provider is separate from grass encounters.
 local AmbientPokemon

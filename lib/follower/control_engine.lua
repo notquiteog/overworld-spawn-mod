@@ -326,7 +326,7 @@ function ControlEngine:_game()
   local mod = self.mod
   if mod then
     if type(mod.game) == "table" then return mod.game end
-    if mod.world and type(mod.world.game) == "table" then return mod.world.game end
+    if mod.world and type(mod.game) == "table" then return mod.game end
   end
   local Game = tryRequire("src.core.Game")
   return Game
@@ -581,7 +581,7 @@ end
 
 function ControlEngine:_isYellow()
   local GameCompat = V.require("game_compat")
-  local game = self.mod and self.mod.world and self.mod.world.game
+  local game = self.mod and self.mod.game
   return GameCompat.gameVersion(game) == "yellow"
 end
 

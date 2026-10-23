@@ -94,6 +94,10 @@ function WildsFs.readAsset(mod, path)
         return data
       end
     end
+    -- A missing packaged asset stays missing; do not retry through the
+    -- legacy io shim after the public owned read has already answered.
+    _assetExists[rel] = false
+    return nil
   end
   local data = headlessBytes(rel)
   if data then
@@ -148,6 +152,9 @@ function WildsFs.enginePathExists(path)
     _engineExists[path] = true
     return true
   end
+  -- Raw IO is only a standalone headless fixture fallback. Native API3
+  -- profiles use the public owner or the engine asset/image loader above.
+  if V and V.mod and type(V.mod.read) == "function" then return false end
   local f = ioOpen(path)
   if not f then f = ioOpen("./" .. path) end
   if f then

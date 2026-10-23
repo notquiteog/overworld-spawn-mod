@@ -142,7 +142,7 @@ function Diagnostics.entityDetail(logic, entity, record)
     local SafariCompat = V.require("safari_compat")
     local world = logic and logic.mod and logic.mod.world
     local ow = world and world.overworld and world:overworld()
-    local game = world and world.game
+    local game = logic.mod.game
     local mapId = (record and record.mapId)
                or (ow and ow.map and ow.map.id)
                or (logic and logic.activeMapId)
@@ -391,7 +391,7 @@ function Diagnostics.entityDetail(logic, entity, record)
       or (entity.usingEnhancedSprite and "FOLLOW_SPRITES")
       or (entity.usingFallback and "BLACK_FALLBACK") or "LEGACY_PNG"))
   if logic and logic.render and logic.render.spriteProviders then
-    local game = logic.mod.world and logic.mod.world.game
+    local game = logic.mod.game
     local style = Config.spriteStyle(logic.mod)
     for _, line in ipairs(logic.render.spriteProviders:diagnostics(style, game, entity)) do
       lines[#lines + 1] = line
@@ -605,7 +605,7 @@ function Diagnostics.hudLines(logic)
   end
 
   if render and render.spriteProviders then
-    local game = logic.mod.world and logic.mod.world.game
+    local game = logic.mod.game
     local style = Config.spriteStyle(logic.mod)
     local sample = nil
     for _, entity in pairs(logic.entities or {}) do
@@ -628,7 +628,7 @@ function Diagnostics.hudLines(logic)
       local SafariCompat = V.require("safari_compat")
       local world = logic.mod and logic.mod.world
       local ow = world and world.overworld and world:overworld()
-      local game = world and world.game
+      local game = logic.mod.game
       local mapId = (ow and ow.map and ow.map.id) or logic.activeMapId
       local sStatus = (logic.state and logic.state.safariCompat)
                    or SafariCompat.status(game, ow, mapId)

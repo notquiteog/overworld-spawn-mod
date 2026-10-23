@@ -5,7 +5,7 @@ return function(mod)
  for _,row in ipairs(schema)do
   if row.key=='sprite_style' then row.default='pokemmo' end
  end
- local game=mod.world and mod.world.game
+ local game=mod.game
  local buckets={game and game.options,game and game.save and game.save.options}
  for _,options in pairs(buckets)do
   local saved=options.modOptions and options.modOptions[mod.id]

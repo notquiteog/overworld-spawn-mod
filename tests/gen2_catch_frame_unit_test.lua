@@ -118,7 +118,7 @@ local V = { mod = {
   path = ".",
   log = { info = function() end, warn = function() end },
   options = { get = function(_, k) return optionStore[k] end },
-  world = { game = game },
+  game = game, world = {},
   assets = { path = function(_, rel) return rel end },
   content = {
     sprites = {

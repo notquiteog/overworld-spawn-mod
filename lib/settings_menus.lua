@@ -78,7 +78,7 @@ end
 function SettingsMenus:_resolveGame(game)
   if game then return game end
   local mod = self.mod
-  if mod and mod.world then return mod.world.game end
+  if mod then return mod.game end
   return nil
 end
 
@@ -330,7 +330,7 @@ function SettingsMenus:_applyFollowerCount(game, value)
     if ctrlGame and ctrlGame ~= game and ctrlGame.save then
       ctrlGame.save.pokepcFollowerCount = n
     end
-    local worldGame = self.mod.world and self.mod.world.game
+    local worldGame = self.mod.game
     if worldGame and worldGame ~= game and worldGame ~= ctrlGame and worldGame.save then
       worldGame.save.pokepcFollowerCount = n
     end

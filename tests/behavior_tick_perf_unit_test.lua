@@ -221,7 +221,7 @@ local Config = V.require("config")
 logic.spawns.w1.state = Config.STATE.AVAILABLE
 
 local mod = {
-  world = {
+  world = {},
     game = {
       overworld = {
         map = { id = "test" },
@@ -230,7 +230,6 @@ local mod = {
         pokepcTrailers = {},
       },
     },
-  },
   log = { info = function() end },
   content = { render_pipelines = { register = function() end } },
 }

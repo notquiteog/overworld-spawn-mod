@@ -38,12 +38,11 @@ local V = {
       f:close()
       return data
     end,
-    world = {
-      game = {
+    world = {},
+    game = {
         save = { options = { modOptions = { overworld_wild_spawns = savedOpts } } },
         mods = { modOptions = { overworld_wild_spawns = savedOpts } },
       },
-    },
   },
   path = ".",
 }
@@ -120,40 +119,40 @@ savedOpts.random_encounters = nil
 
 -- ------- Setters -------
 local okRand = Config.setRandomEncounters(V.mod, false, "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 check(okRand == true, "setRandomEncounters accepts false")
 eq(savedOpts.random_encounters, false, "random_encounters written false")
 check(Config.randomEncountersEnabled(V.mod) == false, "reads OFF")
 Config.setRandomEncounters(V.mod, true, "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 check(Config.randomEncountersEnabled(V.mod) == true, "reads ON")
 check(Config.setRandomEncounters(V.mod, "nope", "t", { confirm = false }) == false,
       "rejects invalid random value")
 
 local okSpawn = Config.setSpawnAmount(V.mod, "high", "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 check(okSpawn == true, "setSpawnAmount accepts high")
 eq(Config.spawnAmount(V.mod), "high", "spawnAmount reads high")
 
 Config.setWaterMons(V.mod, false, "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 check(Config.waterMons(V.mod) == false, "legacy false → spawn disabled")
 eq(Config.waterDisplayMode(V.mod), "classic_encounters", "legacy false → classic_encounters")
 Config.setWaterMons(V.mod, true, "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 check(Config.waterMons(V.mod) == true, "legacy true → spawn enabled")
 eq(Config.waterDisplayMode(V.mod), "swimming_sprites", "legacy true → swimming_sprites")
 Config.setWaterMons(V.mod, "silhouettes", "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 eq(Config.waterDisplayMode(V.mod), "silhouettes", "set silhouettes mode")
 Config.setWaterMons(V.mod, "swimming_sprites", "start_menu", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 eq(Config.waterDisplayMode(V.mod), "swimming_sprites", "restore swimming_sprites")
 
@@ -252,7 +251,7 @@ check(tHigh > tLow, "high density > low density")
 local mf = io.open("manifest.json", "r")
 local mft = mf:read("*a")
 mf:close()
-check(mft:find('"version"%s*:%s*"2%.2%.0"') ~= nil, "manifest version 2.2.0")
+check(mft:find('"api"%s*:%s*3') ~= nil, "Portable API3 manifest")
 
 -- Start menu no longer injects Wilds gameplay settings.
 do

@@ -302,7 +302,7 @@ end
 ----------------------------------------------------------------
 if root then
   package.path = root .. "/?.lua;" .. root .. "/?/init.lua;" .. package.path
-  package.loaded["src.render.Assets"] = package.loaded["src.render.Assets"] or {}
+  package.loaded["src.render.Assets"] = package.loaded["src.render.Assets"] or { register = function() end }
   package.loaded["src.ui.gen2.Chrome"] = package.loaded["src.ui.gen2.Chrome"] or {}
   package.loaded["src.render.Font"] = package.loaded["src.render.Font"] or {}
   package.loaded["src.render.GbcPalette"] = package.loaded["src.render.GbcPalette"] or {}

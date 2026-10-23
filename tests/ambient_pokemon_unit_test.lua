@@ -321,8 +321,8 @@ check(goldGame.save.pokedex == nil, "fixture Pokédex is empty")
 eq(goldSpawned, 1, "empty Pokédex still spawned New Bark Sentret")
 
 -- Live overworld wiring: WorldAPI:overworld() is how Gold map.entered finds World.
+V.mod.game = goldGame
 V.mod.world = {
-  game = goldGame,
   overworld = function() return goldOw end,
 }
 
@@ -339,7 +339,8 @@ goldAmbient:onMapEntered({ mapId = "NEW_BARK_TOWN" })
 eq(goldAmbient:countActive(), 1, "onMapEntered via liveOverworld/overworld() spawns")
 goldAmbient:onMapExited({ mapId = "NEW_BARK_TOWN" })
 eq(goldAmbient:countActive(), 0, "onMapExited clears after live enter")
-V.mod.world = { game = nil, overworld = function() return nil end }
+V.mod.game = nil
+V.mod.world = { overworld = function() return nil end }
 
 if failures > 0 then
   io.stderr:write(failures .. " failure(s)\n")

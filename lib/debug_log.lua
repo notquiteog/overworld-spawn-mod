@@ -36,7 +36,7 @@ end
 
 local function emitFollowerGen2(mod, fmt, ...)
   local okGC, GameCompat = pcall(function() return V.require("game_compat") end)
-  local game = mod and (mod.game or (mod.world and mod.world.game))
+  local game = mod and (mod.game)
   if not (okGC and GameCompat and GameCompat.isGen2(mod, game)) then return end
   if not (mod and mod.log and type(mod.log.info) == "function") then return end
   local msg = fmt

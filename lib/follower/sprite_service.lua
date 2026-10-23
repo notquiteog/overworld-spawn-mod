@@ -49,7 +49,7 @@ end
 function SpriteService:dexOf(species, game)
   -- Runtime Pokédex identity (gameplay). Do not use for Wilds asset paths.
   local GameCompat = V.require("game_compat")
-  game = game or (self.mod and self.mod.world and self.mod.world.game)
+  game = game or (self.mod and self.mod.game)
   return GameCompat.speciesId(species, game, self.mod)
 end
 
@@ -395,6 +395,12 @@ end
 
 function SpriteService:installPartyMenuHook()
   if self._partyHookInstalled then return true end
+  -- Gen2 draws species icons as instance methods and composes held-item
+  -- quadrants. The Gen1 static drawer facade deliberately has no backing.
+  local Compat=V.require("game_compat")
+  if not Compat.isGen1(self.mod,self.mod and self.mod.game) then
+    return false,"native_generation_icon_drawer"
+  end
 
   local PartyScreen = nil
   for _, path in ipairs(PARTY_SCREEN_MODULES) do

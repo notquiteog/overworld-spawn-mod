@@ -175,7 +175,7 @@ local mod = {
       return nil
     end,
   },
-  world = { game = game }, -- NO overworld() method
+  game = game, world = {}, -- NO overworld() method
   assets = { path = function(_, rel) return rel end },
   content = {
     sprites = {

@@ -395,33 +395,32 @@ eq(Config.normalizeSpriteStyle("poke_followers"), "followers", "migrate poke_fol
 eq(Config.normalizeSpriteStyle("followers"), "followers", "followers stays")
 eq(Config.normalizeSpriteStyle("weird"), "followers", "migrate unknown → followers")
 savedOpts = { use_animated_overworld_sprites = false }
-V.mod.world = {
-  game = {
+V.mod.world = {}
+V.mod.game = {
     save = { options = { modOptions = { overworld_wild_spawns = savedOpts } } },
     mods = { modOptions = { overworld_wild_spawns = savedOpts },
              loader = { modOptions = { overworld_wild_spawns = savedOpts } } },
-  },
-}
+  }
 eq(Config.spriteStyle(V.mod), "pokedex", "legacy false migrates to pokedex")
 savedOpts = { use_animated_overworld_sprites = true }
-V.mod.world.game.save.options.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.save.options.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
 eq(Config.spriteStyle(V.mod), "followers", "legacy true without style → followers default")
 savedOpts = { sprite_style = "pokemmo", use_animated_overworld_sprites = false }
-V.mod.world.game.save.options.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.save.options.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
 eq(Config.spriteStyle(V.mod), "pokemmo", "explicit sprite_style wins over legacy")
 savedOpts = { sprite_style = "gold" }
-V.mod.world.game.save.options.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.save.options.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
 eq(Config.spriteStyle(V.mod), "pokemmo", "saved gold migrates to pokemmo")
 savedOpts = { sprite_style = "followers_ex" }
-V.mod.world.game.save.options.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.modOptions.overworld_wild_spawns = savedOpts
-V.mod.world.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.save.options.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.modOptions.overworld_wild_spawns = savedOpts
+V.mod.game.mods.loader.modOptions.overworld_wild_spawns = savedOpts
 eq(Config.spriteStyle(V.mod), "followers", "saved followers_ex migrates to followers")
 
 -- setSpriteStyle writes the same key used by Mod Settings
@@ -435,36 +434,36 @@ local fakeRender = {
   end,
 }
 local okSet = Config.setSpriteStyle(V.mod, "gold", "start_menu", {
-  game = V.mod.world.game,
+  game = V.mod.game,
   logic = fakeLogic,
   render = fakeRender,
   confirm = false,
 })
 check(okSet == true, "setSpriteStyle accepts legacy gold (normalizes)")
-eq(V.mod.world.game.save.options.modOptions.overworld_wild_spawns.sprite_style,
+eq(V.mod.game.save.options.modOptions.overworld_wild_spawns.sprite_style,
    "pokemmo", "legacy gold writes pokemmo")
-eq(V.mod.world.game.mods.modOptions.overworld_wild_spawns.sprite_style,
+eq(V.mod.game.mods.modOptions.overworld_wild_spawns.sprite_style,
    "pokemmo", "legacy gold writes mod-manager cache pokemmo")
 eq(refreshed, 1, "setSpriteStyle refreshes sprites once")
 
 okSet = Config.setSpriteStyle(V.mod, "pokemmo", "mod_settings", {
-  game = V.mod.world.game,
+  game = V.mod.game,
   logic = fakeLogic,
   render = fakeRender,
   confirm = false,
 })
 check(okSet == true, "setSpriteStyle accepts pokemmo from mod settings path")
-eq(V.mod.world.game.save.options.modOptions.overworld_wild_spawns.sprite_style,
+eq(V.mod.game.save.options.modOptions.overworld_wild_spawns.sprite_style,
    "pokemmo", "mod settings path writes same sprite_style key")
 
 okSet = Config.setSpriteStyle(V.mod, "followers", "mod_settings", {
-  game = V.mod.world.game,
+  game = V.mod.game,
   logic = fakeLogic,
   render = fakeRender,
   confirm = false,
 })
 check(okSet == true, "setSpriteStyle accepts followers")
-eq(V.mod.world.game.save.options.modOptions.overworld_wild_spawns.sprite_style,
+eq(V.mod.game.save.options.modOptions.overworld_wild_spawns.sprite_style,
    "followers", "followers written as public value")
 
 -- Menu module registers screens once and does NOT inject Start Menu rows.

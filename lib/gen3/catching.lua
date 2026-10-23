@@ -110,7 +110,7 @@ return function(mod,S,Actors,busy)
  -- Called only with the host's reserved roster record. A false acceptance
  -- consumes nothing; a failed catch consumes its ball and releases the claim.
  function C.beginCatch(wire,map,request)
-  local g=mod.world.game;local ball=tonumber(request and request.ballId)
+  local g=mod.game;local ball=tonumber(request and request.ballId)
   if not S.shared or S.shared.catching~=true or map~=Map.current or busy() then return false,{message='FIELD UNAVAILABLE'}end
   if not mod.options:get('overworld_catching')or not names[ball]or wire.ambient or wire.scenery or wire.hiddenEncounter or wire.visibleSprite==false then return false,{message='INVALID CATCH'}end
   local Safari=require('src.core.game3.safari')

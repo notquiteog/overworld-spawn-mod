@@ -50,10 +50,10 @@ do
   check(raw:find('"gen3"', 1, true) ~= nil, "games includes gen3")
   check(not raw:find("gen2compat", 1, true),
         "no gen2compat (legacy flag; games is the precise field)")
-  check(raw:find('"api": 2', 1, true) ~= nil or raw:find('"api":2', 1, true) ~= nil,
-        "manifest api 2")
-  check(raw:find(">=0.0.0-0 <2.0.0", 1, true) ~= nil,
-        "game_version still >=0.0.0-0 <2.0.0")
+  check(raw:find('"api": 3', 1, true) ~= nil or raw:find('"api":3', 1, true) ~= nil,
+        "manifest api 3")
+  check(raw:find(">=0.3.96 <3.0.0", 1, true) ~= nil,
+        "game_version still >=0.3.96 <3.0.0")
 end
 
 ----------------------------------------------------------------

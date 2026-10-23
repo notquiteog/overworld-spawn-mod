@@ -45,7 +45,7 @@ local modules={
 }
 for name,value in pairs(modules)do package.loaded[name]=value end
 local assetReads=0
-local mod={assets={image=function(_,path)assetReads=assetReads+1;local bytes=assert(read(path),'missing optional art');return fakeImage(dimension(bytes,17),dimension(bytes,21))end},id='overworld_wild_spawns',world={game=game,startWildBattle=function()battle=battle+1;return true end,queueScript=function()talk=talk+1 end},exports={},log={info=function()end},read=function(_,path)return read(path)end,options={get=function(_,key)return options[key]end,define=function(_,rows)for _,r in ipairs(rows)do if options[r.key]==nil then options[r.key]=r.default end end;return rows end},hooks={wrap=function(_,key,fn)hooks[key]=fn end}}
+local mod={assets={image=function(_,path)assetReads=assetReads+1;local bytes=assert(read(path),'missing optional art');return fakeImage(dimension(bytes,17),dimension(bytes,21))end},content={screens={register=function()end}},id='overworld_wild_spawns',game = game, world = {startWildBattle=function()battle=battle+1;return true end,queueScript=function()talk=talk+1 end},exports={},log={info=function()end},read=function(_,path)return read(path)end,options={get=function(_,key)return options[key]end,define=function(_,rows)for _,r in ipairs(rows)do if options[r.key]==nil then options[r.key]=r.default end end;return rows end},hooks={wrap=function(_,key,fn)hooks[key]=fn end}}
 assert(loadfile('lib/gen3/init.lua'))()(mod)
 local S=mod.exports.gen3
 local function count()local n=0;for _ in pairs(S.spawns)do n=n+1 end;return n end

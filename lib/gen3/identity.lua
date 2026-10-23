@@ -18,7 +18,7 @@ return function(mod)
   local wild,start=Bridge.startWild,Battle.start
   Bridge.startWild=function(nativeMod,game,foe,opts)
    local row=pending
-   if row and game==mod.world.game and foe.species==row.species and foe.level==row.level then
+   if row and game==mod.game and foe.species==row.species and foe.level==row.level then
     local copy={};for k,v in pairs(foe)do copy[k]=v end
     copy.personality=row.personality
     owned[copy]={personality=row.personality,shiny=row.shiny}
@@ -49,7 +49,11 @@ return function(mod)
   -- is enriched only during this call; the exact descriptor follows any
   -- asynchronous transition into Battle.start. Unrelated battles are untouched.
   local previous=pending;pending=row
-  local ok,result,err=pcall(mod.world.startWildBattle,mod.world,row.species,row.level)
+  -- The portable world boundary takes a canonical string; native actor and
+  -- host identity records deliberately retain cartridge numeric species IDs.
+  local species=require('src.core.game3.pokemon').keyName(row.species)
+  if not species then pending=previous;return nil,'unknown native species' end
+  local ok,result,err=pcall(mod.world.startWildBattle,mod.world,species,row.level)
   pending=previous
   if not ok then return nil,result end
   return result,err

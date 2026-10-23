@@ -697,7 +697,7 @@ function PresentationFx:reconcileAfterSync(ow, before, opts)
       local ghost = self:_makeGhost(snap, 0)
       if ghost then
         local GameCompat = V.require("game_compat")
-        local game = self.mod and self.mod.world and self.mod.world.game
+        local game = self.mod and self.mod.game
         if GameCompat and GameCompat.attachPresentationGhost then
           pcall(GameCompat.attachPresentationGhost, ow, ghost, game)
         elseif GameCompat and GameCompat.attachGuestEntity then

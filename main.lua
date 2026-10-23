@@ -66,7 +66,7 @@ return function(mod)
   local Diagnostics = V.require("diagnostics")
 
   local function liveGame()
-    return mod.game or (mod.world and mod.world.game)
+    return mod.game
   end
 
   local function supports(feature)
@@ -300,7 +300,7 @@ return function(mod)
     end
     if render._pendingSpriteRefresh then
       render._pendingSpriteRefresh = false
-      local game = mod.world and mod.world.game
+      local game = mod.game
       pcall(function()
         render:refreshAllEntitySprites(logic, game)
       end)
@@ -389,7 +389,7 @@ return function(mod)
     Config.migrateDevOverlayOption(mod)
     Config.migrateSpriteFadeOption(mod)
     Config.migrateSpriteColorOption(mod)
-    render:finalizeSpriteProviders(mod.world and mod.world.game)
+    render:finalizeSpriteProviders(mod.game)
     if supports("followers") then
       pcall(function()
         local game = liveGame()
@@ -403,7 +403,7 @@ return function(mod)
       noteGameplaySkipped()
     end
     if Config.devOverlay(mod) then
-      local game = mod.world and mod.world.game
+      local game = mod.game
       if game then
         local okAudit, auditErr = pcall(render.auditAssets, render, game)
         if not okAudit then
@@ -429,7 +429,7 @@ return function(mod)
   -- After Followers EX (priority 160) may wrap makeEntity / register providers.
   mod.events:on("mods.loaded", function()
     Config.migrateSpriteStyleOption(mod)
-    local game = mod.world and mod.world.game
+    local game = mod.game
     render:finalizeSpriteProviders(game)
     if supports("followers") then
       pcall(function() follower:reassertAfterModsLoaded(game) end)
@@ -630,26 +630,26 @@ return function(mod)
   end
   mod.exports.setSpriteStyle = function(value, source, opts)
     opts = opts or {}
-    opts.game = opts.game or (mod.world and mod.world.game)
+    opts.game = opts.game or (mod.game)
     opts.logic = opts.logic or logic
     opts.render = opts.render or render
     return Config.setSpriteStyle(mod, value, source or "export", opts)
   end
   mod.exports.setSpawnAmount = function(value, source, opts)
     opts = opts or {}
-    opts.game = opts.game or (mod.world and mod.world.game)
+    opts.game = opts.game or (mod.game)
     opts.logic = opts.logic or logic
     return Config.setSpawnAmount(mod, value, source or "export", opts)
   end
   mod.exports.setRandomEncounters = function(value, source, opts)
     opts = opts or {}
-    opts.game = opts.game or (mod.world and mod.world.game)
+    opts.game = opts.game or (mod.game)
     opts.logic = opts.logic or logic
     return Config.setRandomEncounters(mod, value, source or "export", opts)
   end
   mod.exports.setWaterMons = function(value, source, opts)
     opts = opts or {}
-    opts.game = opts.game or (mod.world and mod.world.game)
+    opts.game = opts.game or (mod.game)
     opts.logic = opts.logic or logic
     return Config.setWaterMons(mod, value, source or "export", opts)
   end
@@ -682,18 +682,18 @@ return function(mod)
     return render.spriteProviders:list()
   end
   mod.exports.refreshAllEntitySprites = function(game)
-    return render:refreshAllEntitySprites(logic, game or (mod.world and mod.world.game))
+    return render:refreshAllEntitySprites(logic, game or (mod.game))
   end
   mod.exports.refreshEntitySprite = function(entity, opts)
     opts = opts or {}
-    opts.game = opts.game or (mod.world and mod.world.game)
+    opts.game = opts.game or (mod.game)
     return logic:refreshEntitySprite(entity, opts)
   end
   -- Stable public water-sprite API for Followers EX / companions.
   -- Default: swimming → levitates → nil (no land sprite masquerade).
   mod.exports.resolveWaterSprite = function(speciesId, isShiny, form, opts)
     opts = opts or {}
-    opts.game = opts.game or (mod.world and mod.world.game)
+    opts.game = opts.game or (mod.game)
     return logic:resolveWaterSprite(speciesId, isShiny, form, opts)
   end
   mod.exports.occupancy = function()

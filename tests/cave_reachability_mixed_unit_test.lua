@@ -35,12 +35,11 @@ local V = {
       f:close()
       return data
     end,
-    world = {
-      game = {
+    world = {},
+    game = {
         save = { options = { modOptions = { overworld_wild_spawns = savedOpts } } },
         mods = { modOptions = { overworld_wild_spawns = savedOpts } },
       },
-    },
   },
   path = ".",
 }
@@ -104,7 +103,7 @@ Config.migrateCaveSpawnMode(V.mod)
 eq(savedOpts.cave_spawns, "mixed", "migrate writes mixed")
 
 Config.setCaveSpawnMode(V.mod, "reachable", "test", {
-  game = V.mod.world.game, confirm = false,
+  game = V.mod.game, confirm = false,
 })
 eq(Config.caveSpawnMode(V.mod), "reachable", "setter reachable")
 

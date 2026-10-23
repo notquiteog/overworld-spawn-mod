@@ -311,7 +311,7 @@ end
 --- Catching-only live world. Gen1: exact previous `mod.world:overworld()`.
 -- Gen2: `game.world` (src/world/gen2/World.lua). Does not change liveOverworld.
 function GameCompat.catchWorld(mod, game)
-  game = game or (mod and (mod.game or (mod.world and mod.world.game)))
+  game = game or (mod and mod.game)
   local adapter = GameCompat.current(mod, game)
   if adapter and adapter.catchWorld then
     local ow = adapter.catchWorld(mod, game)
@@ -479,7 +479,7 @@ end
 -- Gen2: WorldAPI:overworld() → game.world (only once world.map exists).
 -- Does NOT assign game.overworld = game.world; the two are not identical.
 function GameCompat.liveOverworld(mod, game)
-  game = game or (mod and (mod.game or (mod.world and mod.world.game)))
+  game = game or (mod and mod.game)
   local api = mod and mod.world
   if api then
     if type(api.overworld) == "function" then

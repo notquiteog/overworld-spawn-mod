@@ -103,7 +103,7 @@ function OverworldCatching.new(mod, logic)
 end
 
 function OverworldCatching:game()
-  if self.mod.world and self.mod.world.game then return self.mod.world.game end
+  if self.mod.game then return self.mod.game end
   return self.mod.game
 end
 

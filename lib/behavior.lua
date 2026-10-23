@@ -1058,7 +1058,7 @@ restoreLandSprite = function(entity, ctx)
   local logic = ctx and ctx.logic
   local game = ctx and ctx.game
   if not game and entity.mod and entity.mod.world then
-    game = entity.mod.world.game
+    game = entity.mod.game
   end
   if logic and logic.refreshEntitySprite then
     pcall(logic.refreshEntitySprite, logic, entity, {
@@ -1098,7 +1098,7 @@ prepareWaterSprite = function(entity, ctx)
   local logic = ctx and ctx.logic
   local game = ctx and ctx.game
   if not game and entity.mod and entity.mod.world then
-    game = entity.mod.world.game
+    game = entity.mod.game
   end
   entity.originSurface = entity.originSurface or entity.surface or Surface.GRASS
   entity.pendingSurface = Surface.WATER
@@ -1235,7 +1235,7 @@ applyWaterSurfaceTransition = function(entity, ctx)
   local logic = ctx and ctx.logic
   local game = ctx and ctx.game
   if not game and entity.mod and entity.mod.world then
-    game = entity.mod.world.game
+    game = entity.mod.game
   end
   if logic and logic.refreshEntitySprite then
     pcall(function()
@@ -2153,7 +2153,7 @@ function Behavior.attach(entity, behavior, region, rng)
     -- Swap to water sprites once when behaviour attaches (preserves entity id).
     if entity.render and entity.render.applyProviderSprite
        and not entity.hiddenEncounter and entity.visibleSprite ~= false then
-      local game = entity.mod and entity.mod.world and entity.mod.world.game
+      local game = entity.mod and entity.mod.game
       pcall(entity.render.applyProviderSprite, entity.render, entity, game)
     end
   elseif entity.surface == Surface.WATER then

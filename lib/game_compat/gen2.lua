@@ -169,15 +169,14 @@ function Gen2.pickEncounter(game, mapId, kind, ctx)
   return Enc.pick(game, mapId, kind, ctx)
 end
 
---- Gold wild battle: WorldAPI.queueScript start_battle wild species level.
--- WorldAPI builds src.battle.gen2.Mon and World:startBattle({ wild = mon }).
+--- Validated public wild battle action; the facade constructs native Gen2 mons.
 function Gen2.startWildBattle(world, species, level)
-  if not (world and type(world.queueScript) == "function") then
+  if not (world and type(world.startWildBattle) == "function") then
     return nil, "no world"
   end
-  return world:queueScript({
-    { "start_battle", "wild", species, tonumber(level) or 5 },
-  })
+  -- API3 uses Gen1 species spelling in every generation.
+  species = ({ FARFETCH_D = "FARFETCHD", MR__MIME = "MR_MIME" })[species] or species
+  return world:startWildBattle(species, tonumber(level) or 5)
 end
 
 -- STANDING_DOWN (src/world/gen2/Npc.lua MOVE table). STILL=1 carries
@@ -336,7 +335,7 @@ end
 -- WorldAPI:overworld() returns the same World once world.map exists; catching
 -- must not depend on that, because Wilds already attach to game.world.
 function Gen2.catchWorld(mod, game)
-  game = game or (mod and (mod.game or (mod.world and mod.world.game)))
+  game = game or (mod and mod.game)
   if game and game.world and (game.world.player or game.world.map) then
     return game.world
   end

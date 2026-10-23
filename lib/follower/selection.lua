@@ -20,6 +20,10 @@ end
 -- this exact colon-separated shape.
 local function monFingerprint(mon)
   if type(mon) ~= "table" then return nil end
+  -- API3 callbacks hand out detached canonical records. Their read-only
+  -- native diagnostic fields preserve this existing persisted identity key;
+  -- never mutate that detached copy or treat it as a live party member.
+  mon = type(mon.native) == "table" and mon.native or mon
   local dvs = type(mon.dvs) == "table" and mon.dvs or {}
   return table.concat({
     tostring(mon.species or ""),
@@ -35,6 +39,10 @@ end
 -- Legacy PokéPC key without species (ot:dvs:catchRate).
 local function monFingerprintLegacy(mon)
   if type(mon) ~= "table" then return nil end
+  -- API3 callbacks hand out detached canonical records. Their read-only
+  -- native diagnostic fields preserve this existing persisted identity key;
+  -- never mutate that detached copy or treat it as a live party member.
+  mon = type(mon.native) == "table" and mon.native or mon
   local dvs = type(mon.dvs) == "table" and mon.dvs or {}
   return table.concat({
     tostring(mon.otId or -1),
@@ -127,7 +135,11 @@ function Selection:selectFollower(mon, game, opts)
       break
     end
   end
-  if not slot then return false end
+  if not slot then
+    local key=monFingerprint(mon)
+    for i,candidate in ipairs(party)do if monFingerprint(candidate)==key then slot=i;mon=candidate;break end end
+  end
+  if not slot or not healthy(mon) then return false end
 
   local key = monFingerprint(mon)
   if not key then return false end

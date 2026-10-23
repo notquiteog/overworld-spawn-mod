@@ -44,7 +44,7 @@ local TEST_STEPS = {
 }
 
 local function gameOf(mod)
-  if mod.world and mod.world.game then return mod.world.game end
+  if mod.game then return mod.game end
   return mod._testGame
 end
 
@@ -2843,7 +2843,7 @@ function SpawnLogic:onMapEntered(ev)
   -- Re-assert style-owned makeEntity wrap before any spawn (Followers may wrap later).
   if self.render and self.render.ensureStyleOwnedMakeEntity then
     local world = self.mod.world
-    local game = world and world.game
+    local game = self.mod.game
     pcall(function() self.render:ensureStyleOwnedMakeEntity(game) end)
     local style = Config.spriteStyle(self.mod)
     self:_log("sprite_style mapenter saved/config/resolver=%s", tostring(style))
@@ -3022,7 +3022,7 @@ function SpawnLogic:onOptionsChanged(payload)
     -- SpriteRenderers are never reused.
     if Config.waterMons(self.mod) and self.render then
       local world = self.mod.world
-      local game = world and world.game
+      local game = self.mod.game
       if self.render.invalidateAssetCache then
         pcall(self.render.invalidateAssetCache, self.render)
       end
@@ -3042,7 +3042,7 @@ function SpawnLogic:onOptionsChanged(payload)
                 or payload.value))
     if self.render then
       local world = self.mod.world
-      local game = world and world.game
+      local game = self.mod.game
       if self.render.invalidateAssetCache then
         pcall(self.render.invalidateAssetCache, self.render)
       end
@@ -3086,7 +3086,7 @@ function SpawnLogic:onOptionsChanged(payload)
     -- handler refreshes both together; Flat↔Voxel effective-mode rebind also
     -- refreshes presentation without touching any saved option.
     local world = self.mod.world
-    local game = world and world.game
+    local game = self.mod.game
     self.render:invalidateAssetCache()
     if self.render.waterSpriteRegistry and self.render.waterSpriteRegistry.invalidateCache then
       pcall(self.render.waterSpriteRegistry.invalidateCache, self.render.waterSpriteRegistry)
@@ -3329,7 +3329,7 @@ function SpawnLogic:_pollTrueSizeEffectiveMode()
   local changed, effective = VariableSize.pollEffectiveModeChange(self.mod)
   if not changed then return end
   local world = self.mod.world
-  local game = world and world.game
+  local game = self.mod.game
   if self.render then
     if self.render.invalidateAssetCache then
       pcall(self.render.invalidateAssetCache, self.render)

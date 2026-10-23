@@ -786,7 +786,7 @@ end
 
 local function liveOw(self)
   local world = self.mod and self.mod.world
-  local game = world and world.game
+  local game = self.mod.game
   local GameCompat = V.require("game_compat")
   local ow = GameCompat.liveOverworld(self.mod, game)
   if ow then return ow, game end
@@ -825,7 +825,7 @@ end
 -- Does not roll a new town set when the existing NPCs can be reinserted.
 function AmbientPokemon:reconcileAfterBattle(ow, game, source)
   ow = ow or select(1, liveOw(self))
-  game = game or (self.mod and self.mod.world and self.mod.world.game)
+  game = game or (self.mod and self.mod.game)
   if not ow or not ow.map or not ow.player then
     return false, "no_overworld"
   end
@@ -896,7 +896,7 @@ end
 function AmbientPokemon:refreshSprites(game)
   self._spriteCache = {}
   local world = self.mod.world
-  game = game or (world and world.game)
+  game = game or (self.mod.game)
   local n = 0
   for npc in pairs(self.active) do
     if npc and npc.ambientSpecies then
@@ -910,7 +910,7 @@ end
 
 function AmbientPokemon:talkTo(ow, npc, done)
   local game = (ow and ow.game)
-    or (self.mod.world and self.mod.world.game)
+    or (self.mod.game)
   if not (npc and npc.wildsAmbientPokemon) then
     if done then done() end
     return
@@ -998,7 +998,7 @@ function AmbientPokemon:onOptionsChanged(payload)
   elseif key == "sprite_style"
       or key == "use_animated_overworld_sprites"
       or key == "pokemon_size" then
-    local game = self.mod.world and self.mod.world.game
+    local game = self.mod.game
     self:refreshSprites(game)
   end
 end
