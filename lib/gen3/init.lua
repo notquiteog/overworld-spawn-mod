@@ -81,6 +81,15 @@ return function(mod)
  end
  local ambientFor=loadfile('ambient')(require('src.core.GameVersion'),Pokemon)
  local function ambientSpecies()return ambientFor(Map.current)end
+ local function retireFar()
+  -- Match the existing Gen1/2 22-cell retirement distance so a full quota
+  -- behind the player cannot starve the next patch on a long route. Shared
+  -- rosters may still be occupied by another player; their owner keeps them.
+  if S.shared then return end
+  for _,r in pairs(S.spawns)do
+   if not r.catching and not r.chasing and math.max(math.abs(r.cellX-Player.cellX),math.abs(r.cellY-Player.cellY))>22 then S.remove(r)end
+  end
+ end
  local function populate()
   if S.shared and S.shared.role=='guest' then return end
   local occupied,count,ambient={},0,0
@@ -321,7 +330,7 @@ return function(mod)
    for _,row in pairs(S.spawns)do
     if row.visible and not row.catching and row.cellX==Player.cellX and row.cellY==Player.cellY then S.encounter(row);break end
    end
-   S.refill=S.refill+dt;if S.refill>5 then S.refill=0;populate()end
+   S.refill=S.refill+dt;if S.refill>5 then S.refill=0;retireFar();populate()end
   end
   Followers.update(g,dt);Catching.update(g,dt)
  end

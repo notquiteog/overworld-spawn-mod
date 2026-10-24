@@ -6,7 +6,7 @@ end
 local function read(path)local f=io.open(path,'rb');if not f then return end;local s=f:read('*a');f:close();return s end
 local options,hooks={},{}
 local Player={cellX=15,cellY=15,px=240,py=240,facing='right'}
-local Map={current='FR_ROUTE_1',currentDef=function()return{width=40,height=40}end}
+local Map={current='FR_ROUTE_1',currentDef=function()return{width=40,height=80}end}
 local Objects={forDraw=function()return{}end,blocks=function()return false end}
 local Sprites={getDraw=function()end,playerGraphicsId=function()return 1 end}
 local game={phase='field',options={modOptions={}},mods={modOptions={}},session={party={{species=1,hp=20},{species=2,hp=20},{species=3,hp=20}},bag={[4]=10},dex={}}}
@@ -32,8 +32,8 @@ local modules={
  ['src.ui.game3.party_menu']={handleInput=function()end},
  ['src.ui.game3.option_rows']={build=function()return{}end,group=function(all)return all end},
  ['src.core.game3.player']=Player,['src.core.game3.map']=Map,['src.core.game3.objects']=Objects,['src.core.game3.ow_sprites']=Sprites,
- ['src.core.game3.collision']={isWalkable=function(x,y)return x>=0 and y>=0 and x<30 and y<40 end,isWater=function(x,y)return x>=30 and x<40 and y>=0 and y<40 end,warpAt=function()return false end,isGrass=function(x)return x<30 end,directionallyImpassable=function()return false end},
- ['src.core.game3.encounters']={ensureLoaded=function()end,tableFor=function()return{land={slots={{species=16,level=4}}},water={slots={{species=129,level=5}}}}end,terrainAt=function(x,y)if x<0 or y<0 or x>=40 or y>=40 then return end;return x>=30 and'water'or'land'end},
+ ['src.core.game3.collision']={isWalkable=function(x,y)return x>=0 and y>=0 and x<30 and y<80 end,isWater=function(x,y)return x>=30 and x<40 and y>=0 and y<80 end,warpAt=function()return false end,isGrass=function(x)return x<30 end,directionallyImpassable=function()return false end},
+ ['src.core.game3.encounters']={ensureLoaded=function()end,tableFor=function()return{land={slots={{species=16,level=4}}},water={slots={{species=129,level=5}}}}end,terrainAt=function(x,y)if x<0 or y<0 or x>=40 or y>=80 then return end;return x>=30 and'water'or'land'end},
  ['src.core.game3.pokemon']={national=function(s)return s end,name=function(s)return'MON'..s end,types=function()return{1,2}end,frontPic=function()return{image=fakeImage(64,64),w=64,h=64}end},
  ['src.core.game3.field']={interact=function()return false end},['src.mods.Gen3Compat']={worldBusy=function()return false end},
  ['src.core.game3.dex']={isCaught=function(dex,s)return dex[s]end},
@@ -54,6 +54,39 @@ eq(#mod.exports.optionSchema,#schema,'same schema count')
 eq(options.sprite_style,'pokemmo','Gen3 HGSS default')
 eq(schema[2].default,'followers','Gen1/2 GSC default preserved')
 S.update(.1);eq(count(),6,'normal density')
+local nativeSteps=0;local elapsed=S.elapsed
+hooks['input.step'](function(g,dt)eq(g,game,'native step game retained');eq(dt,.05,'native step dt retained');nativeSteps=nativeSteps+1 end,game,.05)
+eq(nativeSteps,1,'native input step forwarded once');eq(S.elapsed,elapsed+.05,'field population tick executes once')
+local original={};for id in pairs(S.spawns)do original[id]=true end
+Player.cellY=65;Player.py=65*16
+for _=1,60 do S.update(.1)end
+eq(count(),6,'long native route refills at new habitat')
+for id,row in pairs(S.spawns)do
+ eq(original[id],nil,'far quota replaced with new natural actor')
+ eq(math.max(math.abs(row.cellX-Player.cellX),math.abs(row.cellY-Player.cellY))<=12,true,'replacement stays near player')
+end
+for id in pairs(original)do eq(mod.exports.gen3Actors.rows[id],nil,'retired draw row removed')end
+local catching=S.spawn(16,4,15,20,'land',{behavior='idle'});catching.catching=true
+local chasing=S.spawn(16,4,16,20,'land',{behavior='idle'});chasing.chasing=true;chasing.nextMove=100
+S.refill=6;S.update(0)
+eq(S.spawns[catching.id],catching,'in-progress catch retained beyond retirement radius')
+eq(S.spawns[chasing.id],chasing,'active chase retained beyond retirement radius')
+S.remove(catching);S.remove(chasing)
+local edge=S.spawn(16,4,15,43,'land',{behavior='idle'});edge.nextMove=100
+local far=S.spawn(16,4,15,42,'land',{behavior='idle'});far.nextMove=100
+modules['src.core.game3.field'].locked=true;S.refill=6;S.update(0)
+eq(S.spawns[far.id],far,'busy native field cannot retire actors')
+modules['src.core.game3.field'].locked=false;S.refill=6;S.update(0)
+eq(S.spawns[edge.id],edge,'22-cell boundary stays present')
+eq(S.spawns[far.id],nil,'23-cell actor retires at refill')
+S.remove(edge)
+local authority={role='host',session='travel-test',request=function()return true end}
+mod.exports.sharedSpawns.configure(authority);S.update(.1)
+local host={};for id in pairs(S.spawns)do host[id]=S.spawns[id]end
+Player.cellY=15;Player.py=240;S.refill=6;S.update(0)
+for id,row in pairs(host)do eq(S.spawns[id],row,'host roster not retired by local player travel')end
+mod.exports.sharedSpawns.configure(nil);S.update(.1)
+
 for density,n in pairs({low=3,high=10,very_high=16})do options.spawn_density=density;S.update(.1);eq(count(),n,density..' density')end
 options.enabled=false;S.update(.1);eq(count(),0,'disable removes wilds')
 options.random_encounters=false

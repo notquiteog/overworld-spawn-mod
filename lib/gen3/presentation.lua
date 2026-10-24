@@ -93,7 +93,10 @@ return function(mod,Actors)
     else love.graphics.setColor(1,1,1,alpha)end
     for i=0,8 do
      love.graphics.setScissor(0,i*h,w,h-cut)
-     love.graphics.draw(spr.image,spr.quads[i],0,i*h)
+     -- Actors.front supplies one native picture when an optional sheet is
+     -- unavailable (and for Pokedex style). Repeat that pose rather than
+     -- passing a missing Quad to LÖVE and aborting the field update.
+     love.graphics.draw(spr.image,spr.quads[i]or spr.quads[0],0,i*h)
     end
    end
    love.graphics.pop();c:setFilter('nearest','nearest');nextId=nextId+1;Actors.sprite(nextId,c,w,h,9,hidden and 0 or spr.groundPadding,not hidden and spr.groundPaddingByFrame or nil);cache[key]=nextId
